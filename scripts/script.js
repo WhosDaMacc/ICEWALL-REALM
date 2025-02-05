@@ -1,5 +1,19 @@
 // script.js
 
+// ==================== BATTLE SYSTEM ====================
+let polarBearHealth = 100;
+let iceDragonHealth = 100;
+const attackBtn = document.querySelector('.attack-btn');
+
+// Sound Effects (Add this block)
+const soundEffects = {
+  attack: new Howl({ src: ['assets/sounds/attack.mp3'], volume: 0.5 }),
+  damage: new Howl({ src: ['assets/sounds/damage.mp3'], volume: 0.6 }),
+  victory: new Howl({ src: ['assets/sounds/victory.mp3'], volume: 0.7 })
+};
+
+// Rest of your code (updateHealthBars, resetGame, etc.)
+
 // ==================== MOBILE MENU ==================== 
 const menuBtn = document.querySelector('.menu-btn');
 const navMenu = document.querySelector('.nav-menu');
@@ -106,3 +120,90 @@ function createSnowflakes() {
   }
 }
 createSnowflakes();
+// Define Navitar Classes
+const Navitars = {
+  iceDragon: {
+    name: "Frostclaw",
+    health: 120,
+    attack: 18,
+    defense: 12,
+    speed: 8,
+    abilities: {
+      frostBreath: { damage: 25, staminaCost: 30 },
+      iceShard: { damage: 15, staminaCost: 15 },
+    },
+    stamina: 100,
+  },
+  polarBear: {
+    name: "Glacius",
+    health: 150,
+    attack: 22,
+    defense: 15,
+    speed: 5,
+    abilities: {
+      maul: { damage: 20, staminaCost: 25 },
+      avalanche: { damage: 30, staminaCost: 40 },
+    },
+    stamina: 100,
+  },
+};// Tier Multipliers (Novice, Champion, Elder)
+const tiers = {
+  Novice: { health: 1.0, attack: 1.0, speed: 1.0 },
+  Champion: { health: 1.5, attack: 1.3, speed: 1.2 },
+  Elder: { health: 2.0, attack: 1.6, speed: 1.4 }
+};
+
+// Base Navitar Class
+class Navitar {
+  constructor(name, tier) {
+    this.name = name;
+    this.tier = tier;
+    this.health = 100 * tiers[tier].health;
+    this.attack = 10 * tiers[tier].attack;
+    this.speed = 8 * tiers[tier].speed;
+    this.stamina = 100;
+    this.abilities = [];
+  }
+}
+
+// Polar Bear Navitar (Glacius)
+class PolarBear extends Navitar {
+  constructor(tier) {
+    super("Glacius", tier);
+    this.abilities = [
+      { 
+        name: "Arctic Maul", 
+        damage: 20 * tiers[tier].attack, 
+        cost: 15,
+        effect: "stun" // 25% chance to stun
+      },
+      {
+        name: "Avalanche Crush",
+        damage: 35 * tiers[tier].attack,
+        cost: 30,
+        effect: "defense_break" // Reduces target’s defense by 20%
+      }
+    ];
+  }
+}
+
+// Ice Dragon Navitar (Frostclaw)
+class IceDragon extends Navitar {
+  constructor(tier) {
+    super("Frostclaw", tier);
+    this.abilities = [
+      { 
+        name: "Frost Breath", 
+        damage: 25 * tiers[tier].attack, 
+        cost: 20,
+        effect: "freeze" // Freezes target for 1 turn
+      },
+      {
+        name: "Ice Shard Barrage",
+        damage: 15 * tiers[tier].attack,
+        cost: 10,
+        effect: "bleed" // Deals 5% max health/turn for 2 turns
+      }
+    ];
+  }
+}
