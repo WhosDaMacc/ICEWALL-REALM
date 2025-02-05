@@ -1,6 +1,4 @@
 /* main.css */
-@import url("theme.css");
-@import url('theme.css'); /* Link theme.css */
 
 /* Base Styles */
 * {
@@ -13,6 +11,8 @@ body {
   font-family: 'Arial', sans-serif;
   background: var(--background-gradient);
   color: var(--text-color);
+  line-height: 1.6;
+  padding-top: 80px; /* Offset for fixed header */
 }
 
 /* Header & Navigation */
@@ -24,6 +24,9 @@ body {
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(10px);
   z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .logo img {
@@ -94,3 +97,42 @@ footer {
   text-align: center;
   padding: 2rem;
   background: rgba(0, 0, 0, 0.5);
+  margin-top: 2rem;
+}
+
+/* ============== Mobile Styles ============== */
+@media (max-width: 768px) {
+  .menu-btn {
+    display: block;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1000;
+  }
+
+  .nav-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(5px);
+    width: 200px;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: right;
+  }
+
+  .nav-menu.active {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    animation: fadeIn 0.3s ease;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
