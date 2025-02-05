@@ -207,3 +207,64 @@ class IceDragon extends Navitar {
     ];
   }
 }
+// Create Navitars
+const glacius = new PolarBear("Elder"); // Tier: Elder
+const frostclaw = new IceDragon("Champion"); // Tier: Champion
+
+// Simulate a turn function
+function navitarAttack(attacker, defender) {
+    const ability = attacker.abilities[0]; // Use first ability
+    console.log(`${attacker.name} attacks ${defender.name} with ${ability.name}!`);
+
+    // Check if the attacker has enough stamina
+    if (attacker.stamina >= ability.cost) {
+        defender.health -= ability.damage;
+        attacker.stamina -= ability.cost;
+
+        // Apply tier-based effect
+        if (ability.effect === "stun" && attacker.tier === "Elder") {
+            console.log(`${attacker.name} STUNNED ${defender.name}!`);
+            defender.isStunned = true;
+        }
+
+        console.log(`${defender.name}'s health: ${defender.health}`);
+    } else {
+        console.log(`${attacker.name} does not have enough stamina to use ${ability.name}.`);
+    }
+}
+
+// Example battle loop
+function battle() {
+    let turn = 0;
+    while (glacius.health > 0 && frostclaw.health > 0) {
+        turn++;
+        console.log(`--- Turn ${turn} ---`);
+        
+        // Determine attack order based on speed
+        if (glacius.speed >= frostclaw.speed) {
+            navitarAttack(glacius, frostclaw);
+            if (frostclaw.health > 0) {
+                navitarAttack(frostclaw, glacius);
+            }
+        } else {
+            navitarAttack(frostclaw, glacius);
+            if (glacius.health > 0) {
+                navitarAttack(glacius, frostclaw);
+            }
+        }
+
+        // Regain stamina
+        glacius.stamina = Math.min(glacius.stamina + 10, 100);
+        frostclaw.stamina = Math.min(frostclaw.stamina + 10, 100);
+    }
+
+    // Determine winner
+    if (glacius.health <= 0) {
+        console.log(`${frostclaw.name} wins!`);
+    } else {
+        console.log(`${glacius.name} wins!`);
+    }
+}
+
+// Start the battle
+battle();
