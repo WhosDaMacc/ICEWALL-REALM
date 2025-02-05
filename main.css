@@ -1,4 +1,5 @@
 /* main.css */
+@import url("theme.css");
 @import url('theme.css'); /* Link theme.css */
 
 /* Base Styles */
