@@ -1,0 +1,11 @@
+/* theme.css */
+:root {
+  --primary-color: #6B8DD6;       /* Colon (:) not equals (=) */
+  --secondary-color: #A3D9FF;
+  --accent-color: #FF6B6B;
+  --text-color: #FFFFFF;
+  --dark-frost: #2C3E50;
+  
+  --background-gradient: linear-gradient(45deg, #1a365f, #4b6cb7);
+  --ice-gradient: linear-gradient(120deg, rgba(107, 141, 214, 0.3), rgba(163, 217, 255, 0.3));
+}
