@@ -246,3 +246,6 @@ footer {
   background: #4CAF50; /* Health color */
   transition: width 0.3s ease;
 }
+.hero h1 {  
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);  
+}
