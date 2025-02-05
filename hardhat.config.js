@@ -33,3 +33,28 @@ module.exports = {
     // Add other networks here
   },
 };
+// Importing necessary Hardhat plugins
+require('@nomiclabs/hardhat-waffle');
+require('@nomiclabs/hardhat-ethers');
+require('dotenv').config();
+
+module.exports = {
+  solidity: "0.8.17", // Specify your Solidity version
+  networks: {
+    // Configuration for the Hardhat local network
+    hardhat: {
+      chainId: 1337,
+    },
+    // Configuration for the Polygon Mumbai Testnet
+    polygonMumbai: {
+      url: `https://polygon-mumbai.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      accounts: [`0x${process.env.PRIVATE_KEY}`],
+    },
+    // Configuration for the Polygon Mainnet
+    polygon: {
+      url: `https://polygon-rpc.com`,
+      accounts: [`0x${process.env.PRIVATE_KEY}`],
+    },
+  },
+  // Additional configurations can be added here
+};
