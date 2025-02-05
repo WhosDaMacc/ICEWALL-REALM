@@ -1,5 +1,15 @@
-/* main.css */
-
+/* main.css *
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="theme.css"> <!-- Correct path -->
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <!-- Your content -->
+</body>
+</html>
 /* Base Styles */
 * {
   margin: 0;
