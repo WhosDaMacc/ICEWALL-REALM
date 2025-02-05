@@ -249,3 +249,26 @@ footer {
 .hero h1 {  
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);  
 }
+.tier-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.tier-badge.elder {
+  background: linear-gradient(45deg, #4b6cb7, #1a365f);
+  color: white;
+}
+
+.tier-badge.champion {
+  background: linear-gradient(45deg, #6B8DD6, #A3D9FF);
+}
+
+.tier-badge.novice {
+  background: #2C3E50;
+  color: white;
+}
