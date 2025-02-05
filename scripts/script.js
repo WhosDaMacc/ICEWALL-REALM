@@ -32,3 +32,55 @@ document.querySelector('.attack-btn').addEventListener('click', () => {
     dragon.classList.remove('attack-animation');
   }, 500);
 });
+// script.js
+
+// Mobile Menu Toggle (Existing Code)
+const menuBtn = document.querySelector('.menu-btn');
+const navMenu = document.querySelector('.nav-menu');
+menuBtn.addEventListener('click', () => {
+  navMenu.classList.toggle('active');
+});
+
+// Scroll Animation for Cards (Existing Code)
+const cards = document.querySelectorAll('.card');
+const observer = new IntersectionObserver(
+  entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('show');
+      }
+    });
+  },
+  { threshold: 0.1 }
+);
+cards.forEach(card => observer.observe(card));
+
+// ⚔️ Battle System (NEW CODE) ⚔️
+let polarBearHealth = 100;
+let iceDragonHealth = 100;
+const attackBtn = document.querySelector('.attack-btn');
+
+function updateHealthBars() {
+  // Target the inner health bar element (no ::after pseudo-selector)
+  document.querySelector('.polar-bear .health-bar').style.width = `${polarBearHealth}%`;
+  document.querySelector('.ice-dragon .health-bar').style.width = `${iceDragonHealth}%`;
+}
+
+attackBtn.addEventListener('click', () => {
+  // Reduce health (you can randomize damage later!)
+  polarBearHealth -= 10;
+  iceDragonHealth -= 10;
+  
+  // Update visuals
+  updateHealthBars();
+  
+  // Optional: Add attack animations
+  document.querySelector('.polar-bear img').classList.add('attack-animation');
+  document.querySelector('.ice-dragon img').classList.add('attack-animation');
+  
+  // Reset animations after 0.5s
+  setTimeout(() => {
+    document.querySelector('.polar-bear img').classList.remove('attack-animation');
+    document.querySelector('.ice-dragon img').classList.remove('attack-animation');
+  }, 500);
+});
