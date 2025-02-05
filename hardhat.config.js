@@ -8,3 +8,16 @@ module.exports = {
         }
     }
 };
+module.exports = {
+  solidity: "0.8.17",
+  networks: {
+    polygonMumbai: {
+      url: `https://polygon-mumbai.infura.io/v3/YOUR_INFURA_API_KEY`, // Your Infura API key here
+      accounts: [`0x${e9ea942aba2efcfb03415e00fed2d67}`] // Your wallet private key here
+    },
+    polygon: {
+      url: `https://polygon-rpc.com`, // For Mainnet Polygon
+      accounts: [`0x${e9ea942aba2efcfb03415e00fed2d67}`]
+    },
+  },
+};
