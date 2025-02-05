@@ -18,3 +18,4 @@ def interact():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    print("User Controller Loaded")
