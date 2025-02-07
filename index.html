@@ -1,4 +1,123 @@
-<!-- Inside the <head> or before </body> -->
+<!-- Inside the <head> or before </body> --><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICEWALL REALM</title>
+    
+    <!-- Link CSS files -->
+    <link rel="stylesheet" href="theme.css">
+    <link rel="stylesheet" href="main.css">
+
+    <!-- AR and Particle System Libraries -->
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://unpkg.com/aframe-particle-system-component@1.1.x/dist/aframe-particle-system-component.min.js"></script>
+</head>
+<body style="margin: 0; overflow: hidden;">
+    <!-- Header with Mobile Menu -->
+    <header class="header">
+        <div class="logo">
+            <img src="assets/logo.png" alt="Icewall Realm Logo"> <!-- Fix logo path -->
+        </div>
+        <button class="menu-btn">☰</button>
+        <nav class="nav-menu">
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Welcome to ICEWALL REALM</h1>
+        <p>A frost-themed digital experience</p>
+    </section>
+
+    <!-- Cards Grid -->
+    <div class="card-grid">
+        <div class="card">
+            <h2>Feature 1</h2>
+            <p>Description for feature one.</p>
+        </div>
+        <div class="card">
+            <h2>Feature 2</h2>
+            <p>Description for feature two.</p>
+        </div>
+    </div>
+
+    <!-- AR Scene -->
+    <a-scene vr-mode-ui="enabled: false" arjs="trackingMethod: best;" background="color: #87CEEB;">
+        <!-- AR Marker -->
+        <a-marker preset="hiro">
+            <!-- Icy Dragon Model -->
+            <a-entity gltf-model="#dragon-model" 
+                     scale="0.5 0.5 0.5"
+                     animation-mixer="clip: Idle"
+                     id="dragon">
+                <!-- Frost Breath Particle System -->
+                <a-entity position="0 1 -1" 
+                         particle-system="preset: snow; color: #ADD8E6, #B0E0E6; particleCount: 150; velocityValue: 0 0 -3"
+                         visible="false"
+                         id="frostBreath">
+                </a-entity>
+                <!-- Magical Aura -->
+                <a-entity geometry="primitive: sphere; radius: 1.5" 
+                        material="color: #0000FF; transparent: true; opacity: 0.2"
+                        position="0 0.5 0"
+                        animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
+                </a-entity>
+            </a-entity>
+        </a-marker>
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <!-- Controls -->
+    <div style="position: fixed; bottom: 20px; width: 100%; text-align: center;">
+        <button onclick="frostAttack()" style="background: #B0E0E6; font-size: 20px; padding: 10px;">Frost Breath</button>
+        <button onclick="wingSlam()" style="background: #ADD8E6; font-size: 20px; padding: 10px;">Wing Slam</button>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2024 ICEWALL REALM. All rights reserved.</p>
+    </footer>
+
+    <!-- Script -->
+    <script src="script.js"></script> <!-- Keep this after Howler.js -->
+
+    <script>
+        const dragon = document.getElementById('dragon');
+        const frostBreath = document.getElementById('frostBreath');
+
+        function frostAttack() {
+            // Trigger frost animation
+            frostBreath.setAttribute('visible', true);
+            dragon.setAttribute('animation-mixer', {clip: 'BreathAttack', timeScale: 1});
+            
+            setTimeout(() => {
+                frostBreath.setAttribute('visible', false);
+                dragon.setAttribute('animation-mixer', {clip: 'Idle'});
+            }, 2500);
+        }
+
+        function wingSlam() {
+            // Trigger wing attack animation
+            dragon.setAttribute('animation-mixer', {clip: 'WingAttack', timeScale: 1.2});
+            
+            setTimeout(() => {
+                dragon.setAttribute('animation-mixer', {clip: 'Idle'});
+            }, 1800);
+        }
+    </script>
+    
+    <!-- Replace with your actual dragon model URL -->
+    <script id="dragon-model" type="application/gltf+json">
+        // You'll need to provide/host a blue dragon GLTF model
+        // Example CC0 model: https://sketchfab.com/3d-models/dragon-5b5feb565e1c4a0db6cd2f0d60b6e6c6
+    </script>
+</body>
+</html>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
 <script src="script.js"></script> <!-- Keep this after Howler.js -->
 <!DOCTYPE html>
