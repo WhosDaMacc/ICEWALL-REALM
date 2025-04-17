@@ -1,4 +1,4 @@
-import { NavitarCharacter, NavitarType, Rarity } from '../components/NavitarCharacter';
+import { NavitarCharacter, NavitarType, Rarity } from '@features/navitar/core/NavitarCharacter';
 
 export const navitarCharacters: NavitarCharacter[] = [
   {

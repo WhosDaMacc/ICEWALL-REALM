@@ -19,7 +19,7 @@ import { useNavitarFightClub } from '../contexts/NavitarFightClub';
 import { useBusiness } from '../contexts/BusinessContext';
 import BattleAnimation from './BattleAnimation';
 import { styled } from '@mui/material/styles';
-import { NavitarPersonality } from './NavitarPersonality';
+import { NavitarPersonality } from '@features/navitar/personality/NavitarPersonality';
 import { PersonalityTrait } from './NavitarPersonality';
 
 interface Navitar {

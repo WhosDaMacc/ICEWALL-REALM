@@ -1,14 +1,15 @@
 # Icewall Realm
 
-A dynamic battle system featuring Navitars with unique abilities, tag team combinations, and immersive effects.
+A React-based battle game featuring Navitars and epic battles.
 
 ## Features
 
-- **Navitar Battle System**: Turn-based combat with unique Navitar types and abilities
-- **Tag Team Battles**: Combine two Navitars for powerful fusion attacks
-- **Dynamic Effects**: Visual and sound effects for battles
-- **Combo System**: Build up combo meter for special moves
-- **Type Advantages**: Strategic element based on Navitar types
+- Turn-based battle system
+- Tag team combinations
+- Special effects and animations
+- Combo system
+- Type advantages
+- Team synergy mechanics
 
 ## Getting Started
 
@@ -43,26 +44,19 @@ yarn start
 
 ```
 src/
-├── components/         # React components
-│   ├── BattleEffects.tsx
-│   ├── BattleSoundEffects.tsx
-│   ├── NavitarBattle.tsx
-│   └── TagTeamBattle.tsx
-├── contexts/          # React contexts
-│   └── BattleContext.tsx
-├── docs/             # Documentation
-│   └── NavitarDatabase.md
-└── types/            # TypeScript type definitions
+  ├── components/     # React components
+  ├── contexts/      # React contexts
+  ├── docs/          # Documentation
+  ├── types/         # TypeScript type definitions
+  └── utils/         # Utility functions
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Material-UI for the UI components
+- React for the framework
+- TypeScript for type safety

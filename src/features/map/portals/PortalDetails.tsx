@@ -17,7 +17,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import { Portal, PowerBolt, People, Info, Warning, CheckCircle } from '@mui/icons-material';
-import { PortalEntryAnimation } from './PortalEntryAnimation';
+import { PortalEntryAnimation } from '@features/map/portals/PortalEntryAnimation';
 
 export const PortalDetails: React.FC = () => {
   const { activePortal, setActivePortal } = useRealm();

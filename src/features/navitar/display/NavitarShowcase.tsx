@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Grid, Typography, Container } from '@mui/material';
-import { NavitarDesign } from './NavitarDesign';
+import { NavitarDesign } from '@features/navitar/display/NavitarDesign';
 
 const sampleNavitars = [
   {

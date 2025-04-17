@@ -13,7 +13,13 @@
 
 # Production
 /build
-/dist
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Hardhat
 cache
@@ -22,8 +28,8 @@ typechain
 typechain-types
 
 # IDEs and editors
-.idea
-.vscode
+.idea/
+.vscode/
 *.swp
 *.swo
 
@@ -45,8 +51,26 @@ deployments/localhost
 .next
 .vercel
 
-# New additions from the code block
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local 
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+
+# Cache
+.cache/
+.eslintcache 
