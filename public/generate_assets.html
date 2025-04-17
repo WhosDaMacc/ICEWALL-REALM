@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icewall Realm Logo</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #1a1a1a;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .logo-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            margin: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        canvas {
+            background: transparent;
+            border-radius: 15px;
+            margin: 20px;
+            max-width: 100%;
+            height: auto;
+        }
+        h1 {
+            color: #E1F5FE;
+            font-size: 36px;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        h2 {
+            color: #81D4FA;
+            font-size: 24px;
+            margin: 20px 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .preview-text {
+            color: #4FC3F7;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Icewall Realm Logo Preview</h1>
+    
+    <div class="logo-container">
+        <h2>Extra Large Preview (800x800)</h2>
+        <canvas id="logo800" width="800" height="800"></canvas>
+        <p class="preview-text">Perfect for detailed viewing</p>
+    </div>
+
+    <div class="logo-container">
+        <h2>Large Preview (512x512)</h2>
+        <canvas id="logo512" width="512" height="512"></canvas>
+        <p class="preview-text">Standard large size</p>
+    </div>
+
+    <div class="logo-container">
+        <h2>Medium Preview (192x192)</h2>
+        <canvas id="logo192" width="192" height="192"></canvas>
+        <p class="preview-text">App icon size</p>
+    </div>
+
+    <div class="logo-container">
+        <h2>Favicon Preview (64x64)</h2>
+        <canvas id="favicon" width="64" height="64"></canvas>
+        <p class="preview-text">Browser tab icon size</p>
+    </div>
+
+    <script>
+        function drawIcyParticles(ctx, center, scale, size) {
+            // Draw misty ice cloud effect
+            for (let i = 0; i < 100; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 200 * scale;
+                const x = center + Math.cos(angle) * distance;
+                const y = center + Math.sin(angle) * distance;
+                const particleSize = (Math.random() * 12 + 4) * scale;
+                
+                const gradient = ctx.createRadialGradient(x, y, 0, x, y, particleSize);
+                gradient.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+                gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                
+                ctx.beginPath();
+                ctx.fillStyle = gradient;
+                ctx.arc(x, y, particleSize, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawIceShimmer(ctx, center, scale) {
+            // Add crystalline shimmer effects
+            for (let i = 0; i < 20; i++) {
+                const angle = (Math.PI * 2 / 20) * i;
+                const distance = 120 * scale;
+                const x = center + Math.cos(angle) * distance;
+                const y = center + Math.sin(angle) * distance;
+                
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + (15 * scale), y + (15 * scale));
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.lineWidth = 3 * scale;
+                ctx.stroke();
+            }
+        }
+
+        function drawFrostEffect(ctx, center, scale, size) {
+            // Draw frost patterns
+            for (let i = 0; i < 8; i++) {
+                const angle = (Math.PI * 2 / 8) * i;
+                ctx.save();
+                ctx.translate(center, center);
+                ctx.rotate(angle);
+                
+                ctx.beginPath();
+                ctx.moveTo(0, -90 * scale);
+                ctx.bezierCurveTo(
+                    30 * scale, -120 * scale,
+                    50 * scale, -130 * scale,
+                    80 * scale, -140 * scale
+                );
+                
+                const gradient = ctx.createLinearGradient(0, 0, 80 * scale, -140 * scale);
+                gradient.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+                gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 3 * scale;
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        function drawLogo(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, size, size);
+            
+            const center = size / 2;
+            const scale = size / 512;
+
+            // Draw ice cloud effect first
+            drawIcyParticles(ctx, center, scale, size);
+            
+            // Draw main crystal shape
+            ctx.beginPath();
+            // Top section
+            ctx.moveTo(center + (50 * scale), center - (140 * scale));
+            ctx.lineTo(center + (120 * scale), center - (80 * scale));
+            ctx.lineTo(center + (160 * scale), center);
+            // Bottom section
+            ctx.lineTo(center + (120 * scale), center + (80 * scale));
+            ctx.lineTo(center + (50 * scale), center + (140 * scale));
+            // Left section
+            ctx.lineTo(center - (50 * scale), center + (140 * scale));
+            ctx.lineTo(center - (120 * scale), center + (80 * scale));
+            ctx.lineTo(center - (160 * scale), center);
+            ctx.lineTo(center - (120 * scale), center - (80 * scale));
+            ctx.lineTo(center - (50 * scale), center - (140 * scale));
+            ctx.closePath();
+
+            // Create icy crystal gradient with more dramatic colors
+            const gradient = ctx.createLinearGradient(
+                center - (160 * scale),
+                center - (140 * scale),
+                center + (160 * scale),
+                center + (140 * scale)
+            );
+            gradient.addColorStop(0, '#E1F5FE');   // Very light blue
+            gradient.addColorStop(0.2, '#81D4FA');  // Light blue
+            gradient.addColorStop(0.4, '#4FC3F7');  // Medium light blue
+            gradient.addColorStop(0.6, '#29B6F6');  // Medium blue
+            gradient.addColorStop(0.8, '#03A9F4');  // Standard blue
+            gradient.addColorStop(1, '#0288D1');    // Darker blue
+            
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Add stronger inner glow effect
+            const innerGlow = ctx.createRadialGradient(
+                center, center, 0,
+                center, center, 180 * scale
+            );
+            innerGlow.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+            innerGlow.addColorStop(0.6, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = innerGlow;
+            ctx.fill();
+
+            // Draw frost patterns
+            drawFrostEffect(ctx, center, scale, size);
+
+            // Draw "G" letter with enhanced visibility
+            ctx.font = `bold ${size * 0.35}px Arial`;
+            ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+            ctx.strokeStyle = 'rgba(0, 149, 255, 0.3)';
+            ctx.lineWidth = 4 * scale;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.strokeText('G', center, center);
+            ctx.fillText('G', center, center);
+
+            // Add enhanced shimmer effects
+            drawIceShimmer(ctx, center, scale);
+
+            // Add final highlights with more intensity
+            ctx.beginPath();
+            ctx.moveTo(center - (80 * scale), center - (60 * scale));
+            ctx.lineTo(center - (40 * scale), center - (100 * scale));
+            ctx.lineTo(center, center - (60 * scale));
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.fill();
+        }
+
+        // Generate all assets with an extra large size
+        const sizes = {
+            logo800: 800,
+            logo512: 512,
+            logo192: 192,
+            favicon: 64
+        };
+
+        Object.entries(sizes).forEach(([id, size]) => {
+            const canvas = document.getElementById(id);
+            drawLogo(canvas, size);
+            
+            // Convert to image and download
+            const link = document.createElement('a');
+            if (id === 'favicon') {
+                link.download = 'favicon.ico';
+                link.href = canvas.toDataURL('image/x-icon');
+            } else {
+                link.download = `${id}.png`;
+                link.href = canvas.toDataURL('image/png');
+            }
+            link.click();
+        });
+    </script>
+</body>
+</html> 
