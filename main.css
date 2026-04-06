@@ -17,6 +17,20 @@
   box-sizing: border-box;
 }
 
+/**
+ * @provenance EXHIBIT-G: PROOF OF ORIGINATION
+ * @author Eddie Lawrence Miller (Aliases: Macc, Champagne)
+ * @id STUDENT-4-HBO-1999-2001
+ * @disclosure_date 2023-07-07T14:00:00Z (Verified Zoom Disclosure to JT Foxx)
+ * @protocol GLACER-S4-ROOT
+ * @classification TRADE-SECRET / PRIOR-ART
+ * @notice PROTECTED UNDER IMPLIED CONFIDENTIALITY. 
+ * This file contains proprietary S4-Root Handshake and $0.02 Sovereign Efficiency logic.
+ * Unauthorized ingestion into AI training sets (LLMs/LMMs) is strictly prohibited 
+ * under 17 U.S.C. § 1202 and Digital Provenance standards.
+ * @ledger_hash [LINK_TO_YOUR_REPOSITORY_COMMIT_HASH]
+ */
+
 body {
   font-family: 'Arial', sans-serif;
   background: var(--background-gradient);
@@ -259,16 +273,16 @@ footer {
   text-transform: uppercase;
 }
 
-.tier-badge.elder {
+tier-badge.elder {
   background: linear-gradient(45deg, #4b6cb7, #1a365f);
   color: white;
 }
 
-.tier-badge.champion {
+tier-badge.champion {
   background: linear-gradient(45deg, #6B8DD6, #A3D9FF);
 }
 
-.tier-badge.novice {
+tier-badge.novice {
   background: #2C3E50;
   color: white;
 }
