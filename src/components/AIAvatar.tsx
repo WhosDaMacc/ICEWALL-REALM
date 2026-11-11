@@ -3,6 +3,7 @@ import { useGLTF, Text3D } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useAR } from '../contexts/ARContext';
 import * as THREE from 'three';
+import { askDeepSeek, liveAiStatus } from '../utils/liveAi';
 
 interface AIAvatarProps {
   position: [number, number, number];
@@ -54,32 +55,36 @@ const AIAvatar: React.FC<AIAvatarProps> = ({ position, name, personality, onSpea
     window.speechSynthesis.speak(utterance);
   };
 
-  // Handle user interaction
+  // Handle user interaction. Live AI is gated: while the toggle is OFF
+  // (the default until go-live) this makes NO network call at all — the
+  // navitar answers from a scripted line. The old /api/ai/chat endpoint
+  // never existed, so it is retired here; the ON path goes through
+  // DeepSeek instead, and falls back to the scripted line on failure.
   const handleInteraction = async () => {
     if (isSpeaking) return;
 
     setAnimationState('listening');
 
-    try {
-      // Here you would integrate with your AI service
-      // For now, we'll use a simple response
-      const response = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: `User interacted with ${name} at location ${currentLocation}`,
-          personality,
-        }),
-      });
+    if (liveAiStatus() !== 'ready') {
+      speak(
+        `${name} is listening. Live AI is off until go-live, so I answer from my scripted lines for now.`
+      );
+      setAnimationState('idle');
+      return;
+    }
 
-      const data = await response.json();
-      speak(data.response);
+    try {
+      const reply = await askDeepSeek({
+        navitarName: name,
+        character: personality,
+        userMessage: `User interacted with ${name} at location ${currentLocation}`,
+      });
+      speak(reply ?? "I'm sorry, I couldn't process that right now.");
     } catch (error) {
       console.error('Failed to get AI response:', error);
       speak("I'm sorry, I couldn't process that right now.");
     }
+    setAnimationState('idle');
   };
 
   // Animation loop

@@ -4,6 +4,11 @@ import { ThemeProvider, CssBaseline } from '@mui/material';
 import { createTheme } from '@mui/material/styles';
 import { NavitarProvider } from './contexts/NavitarContext';
 import { BattleProvider } from './contexts/BattleContext';
+import { RealmProvider } from './contexts/RealmContext';
+import { BusinessProvider } from './contexts/BusinessContext';
+import { RewardProvider } from './contexts/RewardContext';
+import { NavitarFightClubProvider } from './contexts/NavitarFightClub';
+import { VenueProvider } from './contexts/VenueContext';
 
 // Pages
 import Home from './pages/Home';
@@ -11,6 +16,7 @@ import Battle from './pages/Battle';
 import NavitarCollection from './pages/NavitarCollection';
 import RealmMap from './pages/RealmMap';
 import Profile from './pages/Profile';
+import Stroll from './pages/Stroll';
 
 // Components
 import Navbar from './components/Navbar';
@@ -49,6 +55,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/collection" element={<NavitarCollection />} />
         <Route path="/realm" element={<RealmMap />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/stroll" element={<Stroll />} />
       </Routes>
     </ErrorBoundary>
   );
@@ -60,15 +67,33 @@ const App: React.FC = () => {
       <CssBaseline />
       <NavitarProvider>
         <BattleProvider>
-          <Router basename="/ICEWALL-REALM">
-            <div className="app">
-              <Navbar />
-              <main className="main-content">
-                <AppRoutes />
-              </main>
-              <Footer />
-            </div>
-          </Router>
+          {/* Provider chain lives here so its state is shared across pages:
+              NavitarFightClub reads Business + Reward, Reward reads Realm,
+              and the navitar created in Battle is the same one the map
+              companion reads. Do not re-wrap pages in these providers — a
+              second instance would shadow this state. */}
+          <RealmProvider>
+            <BusinessProvider>
+              <RewardProvider>
+                <NavitarFightClubProvider>
+                  {/* VenueProvider nests inside the FightClub provider: the
+                      meet card adds a demo person's navitar as a FightClub
+                      opponent when a challenge is accepted. */}
+                  <VenueProvider>
+                    <Router basename="/ICEWALL-REALM">
+                      <div className="app">
+                        <Navbar />
+                        <main className="main-content">
+                          <AppRoutes />
+                        </main>
+                        <Footer />
+                      </div>
+                    </Router>
+                  </VenueProvider>
+                </NavitarFightClubProvider>
+              </RewardProvider>
+            </BusinessProvider>
+          </RealmProvider>
         </BattleProvider>
       </NavitarProvider>
     </ThemeProvider>

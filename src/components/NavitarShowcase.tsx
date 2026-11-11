@@ -14,6 +14,7 @@ const sampleNavitars: NavitarDesignProps[] = [
       defense: 65,
       speed: 75,
     },
+    imageUrl: `${process.env.PUBLIC_URL}/navitars/frostbite.jpg`,
   },
   {
     name: 'Emberwing',
@@ -26,6 +27,7 @@ const sampleNavitars: NavitarDesignProps[] = [
       defense: 60,
       speed: 85,
     },
+    imageUrl: `${process.env.PUBLIC_URL}/navitars/emberwing.jpg`,
   },
   {
     name: 'Leafblade',
@@ -38,6 +40,7 @@ const sampleNavitars: NavitarDesignProps[] = [
       defense: 70,
       speed: 60,
     },
+    imageUrl: `${process.env.PUBLIC_URL}/navitars/leafblade.webp`,
   },
   {
     name: 'Shadowmaw',
@@ -50,6 +53,7 @@ const sampleNavitars: NavitarDesignProps[] = [
       defense: 80,
       speed: 70,
     },
+    imageUrl: `${process.env.PUBLIC_URL}/navitars/shadowmaw.jpg`,
   },
   {
     name: 'Luminara',
@@ -62,6 +66,7 @@ const sampleNavitars: NavitarDesignProps[] = [
       defense: 85,
       speed: 80,
     },
+    imageUrl: `${process.env.PUBLIC_URL}/navitars/luminara.jpg`,
   },
   {
     name: 'Quantix',
@@ -117,6 +122,9 @@ const sampleNavitars: NavitarDesignProps[] = [
   },
 ];
 
+// The Home page's "Featured Navitars" strip shows the first three.
+export const featuredNavitars: NavitarDesignProps[] = sampleNavitars.slice(0, 3);
+
 export const NavitarShowcase: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -133,6 +141,37 @@ export const NavitarShowcase: React.FC = () => {
             <NavitarDesign {...navitar} />
           </Grid>
         ))}
+        {/* Ashwing — the fire phoenix from the bar loop (Darius's navitar,
+            fire, Lv 2). Not part of the 9-navitar roster: it has no rarity
+            or stats anywhere, so the card shows only what is known, plus
+            the 2D / 3D toggle for its new GLB model. */}
+        <Grid item xs={12} sm={6} md={4}>
+          <NavitarDesign
+            name="Ashwing"
+            type="fire"
+            level={2}
+            imageUrl={`${process.env.PUBLIC_URL}/navitars/ashwing.webp`}
+            modelUrl={`${process.env.PUBLIC_URL}/models/fire-phoenix.glb`}
+            modelZoom={1.5}
+          />
+        </Grid>
+        {/* Griffin — the white-blue winged lion from the bar loop (Kai's
+            navitar, ice, Lv 2). Not part of the 9-navitar roster. These
+            are DEFAULTS, not Eddie's picks: name, type, level 2 (matches
+            Ashwing so the two fight on equal footing), rarity rare,
+            stats 80/75/70/80 — all changeable on his say-so. It has no
+            2D art, so the 2D side of the toggle is the type-coloured
+            gradient and the 3D side shows the GLB model. */}
+        <Grid item xs={12} sm={6} md={4}>
+          <NavitarDesign
+            name="Griffin"
+            type="ice"
+            level={2}
+            rarity="rare"
+            stats={{ health: 80, attack: 75, defense: 70, speed: 80 }}
+            modelUrl={`${process.env.PUBLIC_URL}/models/ice-griffin.glb`}
+          />
+        </Grid>
       </Grid>
 
       <Box sx={{ mt: 4, textAlign: 'center' }}>

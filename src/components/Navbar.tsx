@@ -34,6 +34,9 @@ const Navbar: React.FC = () => {
           <Button component={RouterLink} to="/realm" color="inherit">
             Realm Map
           </Button>
+          <Button component={RouterLink} to="/stroll" color="inherit">
+            Stroll
+          </Button>
           <Button component={RouterLink} to="/profile" color="inherit">
             Profile
           </Button>

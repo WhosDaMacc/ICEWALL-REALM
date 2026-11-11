@@ -88,7 +88,17 @@ const initialPortals: RealmPortal[] = [
     id: 'ice1',
     name: 'Frost Gate',
     type: 'ice',
-    location: { lat: 40.7128, lng: -74.006 },
+    // Hollywood — demo portals live in Eddie's territory (Los Angeles),
+    // sharing one viewport with the demo bars. Give a portal a real
+    // lat/lng when it is created and it shows up here automatically.
+    // SPACING: keep every portal >= 0.02 deg from every venue and the
+    // other portal — at zoom 11 the markers are ~40px wide, and closer
+    // than that they stack on top of each other. Frost Gate needs
+    // >= 0.06 deg from the Neon Marquee: at ~0.03 deg the two still
+    // stacked at close zoom (only the snowflake showed, the beer hid
+    // behind it), and the checked-in companion adds a third icon on top.
+    location: { lat: 34.055, lng: -118.295 },
+    locationName: 'Hollywood',
     level: 1,
     isActive: true,
     powerLevel: 75,
@@ -105,7 +115,11 @@ const initialPortals: RealmPortal[] = [
     id: 'fire1',
     name: 'Blaze Gate',
     type: 'fire',
-    location: { lat: 40.7129, lng: -74.0061 },
+    // North San Fernando Valley — moved here (was next to the Valley
+    // Ember Lounge) so the portal and venue markers don't stack.
+    // >= 0.06 deg from the lounge, same rule as Frost Gate.
+    location: { lat: 34.235, lng: -118.415 },
+    locationName: 'San Fernando Valley',
     level: 1,
     isActive: true,
     powerLevel: 85,
