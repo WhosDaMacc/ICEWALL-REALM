@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Icons</title>
+</head>
+<body>
+    <canvas id="iconCanvas" width="24" height="24"></canvas>
+    <script>
+        const canvas = document.getElementById('iconCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function drawNavitarIcon() {
+            // Clear canvas
+            ctx.clearRect(0, 0, 24, 24);
+
+            // Draw ice crystal background
+            ctx.beginPath();
+            ctx.moveTo(12, 2);
+            ctx.lineTo(22, 12);
+            ctx.lineTo(12, 22);
+            ctx.lineTo(2, 12);
+            ctx.closePath();
+
+            // Create ice gradient
+            const gradient = ctx.createLinearGradient(2, 2, 22, 22);
+            gradient.addColorStop(0, '#E1F5FE');
+            gradient.addColorStop(0.5, '#4FC3F7');
+            gradient.addColorStop(1, '#0288D1');
+
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Add shine effect
+            ctx.beginPath();
+            ctx.moveTo(8, 8);
+            ctx.lineTo(12, 6);
+            ctx.lineTo(16, 8);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.fill();
+
+            // Add dragon silhouette
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🐉', 12, 12);
+        }
+
+        // Generate icon
+        drawNavitarIcon();
+        const link = document.createElement('a');
+        link.download = 'navitar.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    </script>
+</body>
+</html> 
