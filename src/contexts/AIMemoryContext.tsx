@@ -45,54 +45,66 @@ export const AIMemoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setMemories(prev => [...prev, newMemory]);
   }, []);
 
-  const getRelevantMemories = useCallback((query: string, limit: number = 5) => {
-    // Simple relevance scoring based on content matching
-    const scoredMemories = memories.map(memory => ({
-      memory,
-      score: calculateRelevanceScore(memory.content, query),
-    }));
+  const getRelevantMemories = useCallback(
+    (query: string, limit: number = 5) => {
+      // Simple relevance scoring based on content matching
+      const scoredMemories = memories.map(memory => ({
+        memory,
+        score: calculateRelevanceScore(memory.content, query),
+      }));
 
-    return scoredMemories
-      .sort((a, b) => b.score - a.score)
-      .slice(0, limit)
-      .map(item => item.memory);
-  }, [memories]);
+      return scoredMemories
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit)
+        .map(item => item.memory);
+    },
+    [memories]
+  );
 
-  const learnFromInteraction = useCallback((interaction: any) => {
-    // Extract key information from the interaction
-    const learningPoints = extractLearningPoints(interaction);
-    
-    learningPoints.forEach(point => {
-      addMemory({
-        type: 'learning',
-        content: point,
-        context: {
-          location: interaction.location,
-          user: interaction.user,
-          avatarId: interaction.avatarId,
-        },
-        importance: 0.7, // Default importance for learned information
+  const learnFromInteraction = useCallback(
+    (interaction: any) => {
+      // Extract key information from the interaction
+      const learningPoints = extractLearningPoints(interaction);
+
+      learningPoints.forEach(point => {
+        addMemory({
+          type: 'learning',
+          content: point,
+          context: {
+            location: interaction.location,
+            user: interaction.user,
+            avatarId: interaction.avatarId,
+          },
+          importance: 0.7, // Default importance for learned information
+        });
       });
-    });
-  }, [addMemory]);
+    },
+    [addMemory]
+  );
 
-  const shareMemory = useCallback((memoryId: string, targetAvatarId: string) => {
-    const memory = memories.find(m => m.id === memoryId);
-    if (memory) {
-      addMemory({
-        ...memory,
-        context: {
-          ...memory.context,
-          avatarId: targetAvatarId,
-        },
-        importance: memory.importance * 0.9, // Slightly reduce importance when shared
-      });
-    }
-  }, [memories, addMemory]);
+  const shareMemory = useCallback(
+    (memoryId: string, targetAvatarId: string) => {
+      const memory = memories.find(m => m.id === memoryId);
+      if (memory) {
+        addMemory({
+          ...memory,
+          context: {
+            ...memory.context,
+            avatarId: targetAvatarId,
+          },
+          importance: memory.importance * 0.9, // Slightly reduce importance when shared
+        });
+      }
+    },
+    [memories, addMemory]
+  );
 
-  const getAvatarMemories = useCallback((avatarId: string) => {
-    return memories.filter(memory => memory.context.avatarId === avatarId);
-  }, [memories]);
+  const getAvatarMemories = useCallback(
+    (avatarId: string) => {
+      return memories.filter(memory => memory.context.avatarId === avatarId);
+    },
+    [memories]
+  );
 
   // Helper functions
   const calculateRelevanceScore = (content: string, query: string): number => {
@@ -105,12 +117,13 @@ export const AIMemoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const extractLearningPoints = (interaction: any): string[] => {
     // This is a simple implementation. You could enhance this with NLP
     const points: string[] = [];
-    
+
     if (interaction.message) {
       // Extract key phrases or facts
       const sentences = interaction.message.split(/[.!?]+/);
-      sentences.forEach(sentence => {
-        if (sentence.length > 20) { // Simple heuristic for meaningful content
+      sentences.forEach((sentence: string) => {
+        if (sentence.length > 20) {
+          // Simple heuristic for meaningful content
           points.push(sentence.trim());
         }
       });
@@ -133,4 +146,4 @@ export const AIMemoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       {children}
     </AIMemoryContext.Provider>
   );
-}; 
+};

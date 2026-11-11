@@ -72,11 +72,7 @@ const BusinessNavitarManager: React.FC<BusinessNavitarManagerProps> = ({ busines
           </CardContent>
         </Card>
       ) : (
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setIsCreateNavitarOpen(true)}
-        >
+        <Button variant="contained" color="primary" onClick={() => setIsCreateNavitarOpen(true)}>
           Create Business Navitar
         </Button>
       )}
@@ -90,14 +86,14 @@ const BusinessNavitarManager: React.FC<BusinessNavitarManagerProps> = ({ busines
             label="Navitar Name"
             fullWidth
             value={navitarName}
-            onChange={(e) => setNavitarName(e.target.value)}
+            onChange={e => setNavitarName(e.target.value)}
           />
           <TextField
             margin="dense"
             label="Skills (comma-separated)"
             fullWidth
             value={navitarSkills}
-            onChange={(e) => setNavitarSkills(e.target.value)}
+            onChange={e => setNavitarSkills(e.target.value)}
             helperText="Enter skills separated by commas"
           />
           <TextField
@@ -106,7 +102,7 @@ const BusinessNavitarManager: React.FC<BusinessNavitarManagerProps> = ({ busines
             type="number"
             fullWidth
             value={navitarLevel}
-            onChange={(e) => setNavitarLevel(Number(e.target.value))}
+            onChange={e => setNavitarLevel(Number(e.target.value))}
             inputProps={{ min: 1, max: 100 }}
           />
         </DialogContent>
@@ -121,4 +117,4 @@ const BusinessNavitarManager: React.FC<BusinessNavitarManagerProps> = ({ busines
   );
 };
 
-export default BusinessNavitarManager; 
+export default BusinessNavitarManager;

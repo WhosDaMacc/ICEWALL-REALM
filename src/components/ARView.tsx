@@ -21,7 +21,7 @@ interface Business {
 interface InteractionData {
   message?: string;
   business?: Business;
-  location?: { latitude: number; longitude: number };
+  location?: { latitude: number; longitude: number } | null;
 }
 
 // Business marker component
@@ -37,13 +37,7 @@ const BusinessMarker: React.FC<{
           <boxGeometry args={[0.5, 0.5, 0.5]} />
           <meshStandardMaterial color="orange" />
         </mesh>
-        <Text
-          position={[0, 0.8, 0]}
-          fontSize={0.2}
-          color="white"
-          anchorX="center"
-          anchorY="middle"
-        >
+        <Text position={[0, 0.8, 0]} fontSize={0.2} color="white" anchorX="center" anchorY="middle">
           {name}
         </Text>
       </Float>
@@ -97,7 +91,7 @@ const ARContent: React.FC = () => {
   // Memoize business markers for better performance
   const businessMarkers = useMemo(() => {
     if (!currentRealm?.businesses) return null;
-    
+
     return currentRealm.businesses.map((business: Business, index: number) => (
       <BusinessMarker
         key={business.id}
@@ -111,7 +105,7 @@ const ARContent: React.FC = () => {
   // Memoize interaction markers
   const interactionMarkers = useMemo(() => {
     if (!interactions) return null;
-    
+
     return interactions.map((interaction, index) => (
       <InteractionMarker
         key={`${interaction.user}-${interaction.timestamp}`}
@@ -126,7 +120,7 @@ const ARContent: React.FC = () => {
   const handleAvatarSpeak = (message: string) => {
     const interactionData: InteractionData = {
       message,
-      location: currentLocation
+      location: currentLocation,
     };
     recordInteraction('avatar_speak', interactionData, currentLocation);
   };
@@ -164,12 +158,12 @@ const ARContent: React.FC = () => {
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} />
       <Environment preset="city" />
-      
+
       {businessMarkers}
       {interactionMarkers}
-      
+
       {/* Render AR objects */}
-      {arObjects.map((obj) => obj.component)}
+      {arObjects.map(obj => obj.component)}
 
       {/* Add a ground plane for better AR placement */}
       {isPresenting && hitPosition && (
@@ -214,7 +208,9 @@ const ARView: React.FC<ARViewProps> = ({ realmId }) => {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}
+      >
         <CircularProgress />
       </Box>
     );
@@ -245,16 +241,12 @@ const ARView: React.FC<ARViewProps> = ({ realmId }) => {
           domOverlay: { root: document.body },
         }}
       />
-      <Canvas
-        camera={{ position: [0, 0, 0], fov: 50 }}
-        dpr={[1, 2]}
-        gl={{ antialias: true }}
-      >
+      <Canvas camera={{ position: [0, 0, 0], fov: 50 }} dpr={[1, 2]} gl={{ antialias: true }}>
         <XR>
           <ARContent />
         </XR>
       </Canvas>
-      
+
       {/* Overlay controls */}
       <Box
         sx={{
@@ -265,11 +257,7 @@ const ARView: React.FC<ARViewProps> = ({ realmId }) => {
           gap: 2,
         }}
       >
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={isARActive ? stopAR : startAR}
-        >
+        <Button variant="contained" color="primary" onClick={isARActive ? stopAR : startAR}>
           {isARActive ? 'Stop AR' : 'Start AR'}
         </Button>
       </Box>
@@ -277,4 +265,4 @@ const ARView: React.FC<ARViewProps> = ({ realmId }) => {
   );
 };
 
-export default ARView; 
+export default ARView;

@@ -66,9 +66,7 @@ const VictoryScreen: React.FC<VictoryScreenProps> = ({ open, onClose, battleId }
                     <Typography variant="subtitle1" color="primary">
                       {battle.challenger.name}
                     </Typography>
-                    <Typography variant="body2">
-                      Level: {battle.challenger.level}
-                    </Typography>
+                    <Typography variant="body2">Level: {battle.challenger.level}</Typography>
                   </Grid>
                   <Grid item xs={2}>
                     <Typography variant="h5" align="center">
@@ -79,9 +77,7 @@ const VictoryScreen: React.FC<VictoryScreenProps> = ({ open, onClose, battleId }
                     <Typography variant="subtitle1" color="secondary">
                       {battle.defender.name}
                     </Typography>
-                    <Typography variant="body2">
-                      Level: {battle.defender.level}
-                    </Typography>
+                    <Typography variant="body2">Level: {battle.defender.level}</Typography>
                   </Grid>
                 </Grid>
               </CardContent>
@@ -110,10 +106,7 @@ const VictoryScreen: React.FC<VictoryScreenProps> = ({ open, onClose, battleId }
                         <ListItemIcon>
                           <SportsEsports color="primary" />
                         </ListItemIcon>
-                        <ListItemText
-                          primary={item}
-                          secondary="Added to your inventory"
-                        />
+                        <ListItemText primary={item} secondary="Added to your inventory" />
                       </ListItem>
                     ))}
                   </List>
@@ -132,4 +125,4 @@ const VictoryScreen: React.FC<VictoryScreenProps> = ({ open, onClose, battleId }
   );
 };
 
-export default VictoryScreen; 
+export default VictoryScreen;

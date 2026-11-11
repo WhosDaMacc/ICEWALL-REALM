@@ -34,7 +34,10 @@ export const ARProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const { isConnected, account } = useWeb3();
   const { recordInteraction } = useRealm();
   const [isARActive, setIsARActive] = useState(false);
-  const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [arObjects, setARObjects] = useState<any[]>([]);
   const [watchId, setWatchId] = useState<number | null>(null);
@@ -50,13 +53,13 @@ export const ARProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
 
       const id = navigator.geolocation.watchPosition(
-        (position) => {
+        position => {
           setCurrentLocation({
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
           });
         },
-        (err) => {
+        err => {
           setError(`Geolocation error: ${err.message}`);
           stopAR();
         },
@@ -87,38 +90,39 @@ export const ARProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     setARObjects([]);
   }, [watchId]);
 
-  const handleInteraction = useCallback(async (type: string, data: any) => {
-    try {
-      if (!isConnected || !account) {
-        throw new Error('Please connect your wallet first');
-      }
+  const handleInteraction = useCallback(
+    async (type: string, data: any) => {
+      try {
+        if (!isConnected || !account) {
+          throw new Error('Please connect your wallet first');
+        }
 
-      if (!currentLocation) {
-        throw new Error('Location not available');
-      }
+        if (!currentLocation) {
+          throw new Error('Location not available');
+        }
 
-      await recordInteraction(type, {
-        ...data,
-        location: currentLocation,
-        timestamp: Date.now(),
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to record interaction');
-    }
-  }, [isConnected, account, currentLocation, recordInteraction]);
+        await recordInteraction(type, {
+          ...data,
+          location: currentLocation,
+          timestamp: Date.now(),
+        });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to record interaction');
+      }
+    },
+    [isConnected, account, currentLocation, recordInteraction]
+  );
 
   const addARObject = useCallback((object: any) => {
-    setARObjects((prev) => [...prev, { ...object, id: Date.now().toString() }]);
+    setARObjects(prev => [...prev, { ...object, id: Date.now().toString() }]);
   }, []);
 
   const removeARObject = useCallback((id: string) => {
-    setARObjects((prev) => prev.filter((obj) => obj.id !== id));
+    setARObjects(prev => prev.filter(obj => obj.id !== id));
   }, []);
 
   const updateARObject = useCallback((id: string, updates: any) => {
-    setARObjects((prev) =>
-      prev.map((obj) => (obj.id === id ? { ...obj, ...updates } : obj))
-    );
+    setARObjects(prev => prev.map(obj => (obj.id === id ? { ...obj, ...updates } : obj)));
   }, []);
 
   useEffect(() => {
@@ -147,4 +151,4 @@ export const ARProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       {children}
     </ARContext.Provider>
   );
-}; 
+};

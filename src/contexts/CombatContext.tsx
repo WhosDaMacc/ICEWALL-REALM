@@ -44,6 +44,13 @@ export interface Battle {
     xp: number;
     items: string[];
   };
+  // Battle state shown by BattleInterface. A fresh battle starts at full
+  // health/energy with an empty log; useAbility updates them on-chain.
+  playerHealth: number;
+  playerEnergy: number;
+  opponentHealth: number;
+  opponentEnergy: number;
+  logs: string[];
 }
 
 interface CombatContextType {
@@ -168,74 +175,96 @@ export const CombatProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const draftAbilities = useCallback(async () => {
     if (!account) return [];
-    
+
     const availableAbilities = abilities.filter(
       ability => ability.tier === currentTier || ability.tier === 'mortal'
     );
-    
+
     const drafted: Ability[] = [];
     while (drafted.length < 3 && availableAbilities.length > 0) {
       const randomIndex = Math.floor(Math.random() * availableAbilities.length);
       drafted.push(availableAbilities[randomIndex]);
       availableAbilities.splice(randomIndex, 1);
     }
-    
+
     setActiveAbilities(drafted);
     return drafted;
   }, [account, abilities, currentTier]);
 
-  const useAbility = useCallback(async (abilityId: string, target: string) => {
-    if (!account || !currentBattle) return;
-    
-    const ability = abilities.find(a => a.id === abilityId);
-    if (!ability) return;
+  const useAbility = useCallback(
+    async (abilityId: string, target: string) => {
+      if (!account || !currentBattle) return;
 
-    try {
-      await contract.useAbility(abilityId, target);
-      
-      // Apply randomized effects
-      if (ability.randomizedTraits) {
-        for (const trait of ability.randomizedTraits) {
-          const effectTriggered = await getRandomizedEffect(ability);
-          if (effectTriggered) {
-            // Apply the effect
-            await contract.applyEffect(target, trait.effect);
+      const ability = abilities.find(a => a.id === abilityId);
+      if (!ability) return;
+
+      try {
+        // No combat contract is deployed yet (Web3Context `contract` is
+        // null), so the on-chain calls are skipped and combat runs locally.
+        if (contract) {
+          await contract.useAbility(abilityId, target);
+
+          // Apply randomized effects
+          if (ability.randomizedTraits) {
+            for (const trait of ability.randomizedTraits) {
+              const effectTriggered = await getRandomizedEffect(ability);
+              if (effectTriggered) {
+                // Apply the effect
+                await contract.applyEffect(target, trait.effect);
+              }
+            }
           }
         }
+      } catch (error) {
+        console.error('Error using ability:', error);
       }
-    } catch (error) {
-      console.error('Error using ability:', error);
-    }
-  }, [account, abilities, currentBattle, contract]);
+    },
+    [account, abilities, currentBattle, contract]
+  );
 
-  const startBattle = useCallback(async (opponent: string) => {
-    if (!account) return;
-    
-    try {
-      const draftedAbilities = await draftAbilities();
-      const battle: Battle = {
-        id: Date.now().toString(),
-        player1: account,
-        player2: opponent,
-        abilities: {
-          player1: draftedAbilities,
-          player2: [], // Opponent's abilities will be set when they join
-        },
-        status: 'active',
-      };
-      
-      setCurrentBattle(battle);
-      await contract.startBattle(opponent, draftedAbilities.map(a => a.id));
-    } catch (error) {
-      console.error('Error starting battle:', error);
-    }
-  }, [account, contract, draftAbilities]);
+  const startBattle = useCallback(
+    async (opponent: string) => {
+      if (!account) return;
+
+      try {
+        const draftedAbilities = await draftAbilities();
+        const battle: Battle = {
+          id: Date.now().toString(),
+          player1: account,
+          player2: opponent,
+          abilities: {
+            player1: draftedAbilities,
+            player2: [], // Opponent's abilities will be set when they join
+          },
+          status: 'active',
+          playerHealth: 100,
+          playerEnergy: 100,
+          opponentHealth: 100,
+          opponentEnergy: 100,
+          logs: [],
+        };
+
+        setCurrentBattle(battle);
+        if (contract) {
+          await contract.startBattle(
+            opponent,
+            draftedAbilities.map(a => a.id)
+          );
+        }
+      } catch (error) {
+        console.error('Error starting battle:', error);
+      }
+    },
+    [account, contract, draftAbilities]
+  );
 
   const endBattle = useCallback(async () => {
     if (!account || !currentBattle) return;
-    
+
     try {
-      await contract.endBattle(currentBattle.id);
+      if (contract) {
+        await contract.endBattle(currentBattle.id);
+      }
       setCurrentBattle(null);
       setActiveAbilities([]);
     } catch (error) {
@@ -243,17 +272,23 @@ export const CombatProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, [account, currentBattle, contract]);
 
-  const getRandomizedEffect = useCallback(async (ability: Ability): Promise<boolean> => {
-    if (!ability.randomizedTraits) return false;
-    
-    try {
-      const randomNumber = await contract.getRandomNumber();
-      return randomNumber % 100 < ability.randomizedTraits[0].chance;
-    } catch (error) {
-      console.error('Error getting randomized effect:', error);
-      return false;
-    }
-  }, [contract]);
+  const getRandomizedEffect = useCallback(
+    async (ability: Ability): Promise<boolean> => {
+      if (!ability.randomizedTraits) return false;
+
+      try {
+        // No combat contract yet: fall back to local randomness.
+        const randomNumber = contract
+          ? await contract.getRandomNumber()
+          : Math.floor(Math.random() * 100);
+        return randomNumber % 100 < ability.randomizedTraits[0].chance;
+      } catch (error) {
+        console.error('Error getting randomized effect:', error);
+        return false;
+      }
+    },
+    [contract]
+  );
 
   return (
     <CombatContext.Provider
@@ -271,4 +306,4 @@ export const CombatProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       {children}
     </CombatContext.Provider>
   );
-}; 
+};

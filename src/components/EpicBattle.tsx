@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Grid, Paper, Typography, Button, CircularProgress, Chip, Dialog, DialogTitle, DialogContent } from '@mui/material';
+import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Button,
+  CircularProgress,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+} from '@mui/material';
 import { useCombat } from '../contexts/CombatContext';
 import { Navitar } from '../data/navitars';
 import BattleAnimation from './BattleAnimation';
@@ -68,14 +79,14 @@ const EpicBattle: React.FC = () => {
     // Calculate epic effects
     const effects = calculateEpicEffects(battleState.activeNavitar!, target);
     const comboMultiplier = calculateComboMultiplier(battleState.lastAction, target.type);
-    
+
     // Create epic AR scene
     createEpicARScene(battleState.activeNavitar!, target, comboMultiplier, effects);
   };
 
   const calculateEpicEffects = (attacker: Navitar, target: Navitar): string[] => {
     const effects = [];
-    
+
     // Type-based effects
     if (attacker.type === 'healer' && target.type === 'attacker') {
       effects.push('healing_aura', 'nature_burst');
@@ -118,15 +129,25 @@ const EpicBattle: React.FC = () => {
 
   const getEpicEnvironment = (type: string): string => {
     switch (type) {
-      case 'healer': return 'enchanted_forest';
-      case 'attacker': return 'volcanic_arena';
-      case 'defender': return 'mountain_fortress';
-      case 'support': return 'cosmic_battlefield';
-      default: return 'default';
+      case 'healer':
+        return 'enchanted_forest';
+      case 'attacker':
+        return 'volcanic_arena';
+      case 'defender':
+        return 'mountain_fortress';
+      case 'support':
+        return 'cosmic_battlefield';
+      default:
+        return 'default';
     }
   };
 
-  const createEpicARScene = (attacker: Navitar, target: Navitar, multiplier: number, effects: string[]) => {
+  const createEpicARScene = (
+    attacker: Navitar,
+    target: Navitar,
+    multiplier: number,
+    effects: string[]
+  ) => {
     if (!sceneRef.current) return;
 
     const scene = document.createElement('a-scene');
@@ -135,21 +156,24 @@ const EpicBattle: React.FC = () => {
 
     // Create epic environment
     const environment = document.createElement('a-entity');
-    environment.setAttribute('environment', JSON.stringify({
-      preset: battleState.battleEnvironment,
-      skyType: 'atmosphere',
-      lighting: 'dramatic',
-      shadow: true,
-      fog: 0.7,
-      dressing: 'epic',
-      dressingAmount: 20,
-      dressingColor: '#FFD700',
-      ground: 'epic',
-      groundYScale: 10,
-      groundTexture: 'epic',
-      groundColor: '#4A4A4A',
-      groundColor2: '#2A2A2A',
-    }));
+    environment.setAttribute(
+      'environment',
+      JSON.stringify({
+        preset: battleState.battleEnvironment,
+        skyType: 'atmosphere',
+        lighting: 'dramatic',
+        shadow: true,
+        fog: 0.7,
+        dressing: 'epic',
+        dressingAmount: 20,
+        dressingColor: '#FFD700',
+        ground: 'epic',
+        groundYScale: 10,
+        groundTexture: 'epic',
+        groundColor: '#4A4A4A',
+        groundColor2: '#2A2A2A',
+      })
+    );
 
     // Add epic particle systems
     effects.forEach(effect => {
@@ -161,11 +185,14 @@ const EpicBattle: React.FC = () => {
 
     // Add epic sound effects
     const sound = document.createElement('a-entity');
-    sound.setAttribute('sound', JSON.stringify({
-      src: getEpicSoundEffect(attacker.ability),
-      autoplay: true,
-      volume: 1.0,
-    }));
+    sound.setAttribute(
+      'sound',
+      JSON.stringify({
+        src: getEpicSoundEffect(attacker.ability),
+        autoplay: true,
+        volume: 1.0,
+      })
+    );
 
     sceneRef.current.innerHTML = '';
     sceneRef.current.appendChild(scene);
@@ -267,15 +294,18 @@ const EpicBattle: React.FC = () => {
     if (!sceneRef.current) return;
 
     const particles = document.createElement('a-entity');
-    particles.setAttribute('particle-system', JSON.stringify({
-      preset: 'nature',
-      particleCount: 2000 * intensity,
-      color: ['#00FF00', '#7CFF7C', '#FFFFFF'],
-      size: 2 * intensity,
-      maxAge: 2,
-      velocityValue: { x: 0, y: 5, z: 0 },
-      accelerationSpread: { x: 10, y: 0, z: 10 },
-    }));
+    particles.setAttribute(
+      'particle-system',
+      JSON.stringify({
+        preset: 'nature',
+        particleCount: 2000 * intensity,
+        color: ['#00FF00', '#7CFF7C', '#FFFFFF'],
+        size: 2 * intensity,
+        maxAge: 2,
+        velocityValue: { x: 0, y: 5, z: 0 },
+        accelerationSpread: { x: 10, y: 0, z: 10 },
+      })
+    );
     sceneRef.current.appendChild(particles);
   };
 
@@ -283,21 +313,27 @@ const EpicBattle: React.FC = () => {
     if (!sceneRef.current) return;
 
     const ground = document.createElement('a-entity');
-    ground.setAttribute('animation', JSON.stringify({
-      property: 'rotation',
-      from: '0 0 0',
-      to: `${Math.random() * intensity} ${Math.random() * intensity} ${Math.random() * intensity}`,
-      dur: 200,
-      easing: 'easeInOutQuad',
-      loop: true,
-    }));
+    ground.setAttribute(
+      'animation',
+      JSON.stringify({
+        property: 'rotation',
+        from: '0 0 0',
+        to: `${Math.random() * intensity} ${Math.random() * intensity} ${Math.random() * intensity}`,
+        dur: 200,
+        easing: 'easeInOutQuad',
+        loop: true,
+      })
+    );
     sceneRef.current.appendChild(ground);
   };
 
   return (
     <Box sx={{ position: 'relative', height: '100vh' }}>
-      <div ref={sceneRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} />
-      
+      <div
+        ref={sceneRef}
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+      />
+
       <Box sx={{ position: 'absolute', bottom: 20, width: '100%', px: 2 }}>
         <Paper sx={{ p: 2, backgroundColor: 'rgba(0, 0, 0, 0.8)' }}>
           <Grid container spacing={2}>
@@ -320,7 +356,7 @@ const EpicBattle: React.FC = () => {
                 />
               )}
             </Grid>
-            
+
             {battleState.activeNavitar && (
               <Grid xs={12}>
                 <Typography color="white">
@@ -332,12 +368,7 @@ const EpicBattle: React.FC = () => {
         </Paper>
       </Box>
 
-      <Dialog 
-        open={showCinematic} 
-        onClose={() => setShowCinematic(false)}
-        maxWidth="xl"
-        fullScreen
-      >
+      <Dialog open={showCinematic} onClose={() => setShowCinematic(false)} maxWidth="xl" fullScreen>
         <DialogTitle>EPIC BATTLE CINEMATIC</DialogTitle>
         <DialogContent>
           <BattleEnvironment
@@ -376,4 +407,4 @@ const EpicBattle: React.FC = () => {
   );
 };
 
-export default EpicBattle; 
+export default EpicBattle;

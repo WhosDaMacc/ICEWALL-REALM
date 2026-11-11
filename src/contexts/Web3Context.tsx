@@ -1,9 +1,42 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { UserManagement } from '../typechain-types';
-import { BusinessProfile } from '../typechain-types';
-import { RealmSystem } from '../typechain-types';
-import { IceToken } from '../typechain-types';
+import type { Tier } from './TierProgression';
+import type { UserManagement } from '../typechain-types';
+import type { BusinessProfile } from '../typechain-types';
+import type { RealmSystem } from '../typechain-types';
+import type { IceToken } from '../typechain-types';
+import {
+  UserManagement__factory,
+  BusinessProfile__factory,
+  RealmSystem__factory,
+  IceToken__factory,
+} from '../typechain-types';
+
+// Combat contract surface used by CombatContext (useAbility, applyEffect,
+// startBattle, endBattle, getRandomNumber) and TierProgression
+// (getUserTier, unlockTier, enterRealm, mentorPlayer). No combat contract
+// is committed in this repo — contracts/ has only UserManagement,
+// BusinessProfile, RealmSystem and IceToken, and the NavitarFight /
+// IceWallFightSystem contracts named in the spec were never added — so the
+// provider exposes `contract: null` and both contexts run locally until a
+// combat contract is deployed and wired into connectWallet. This interface
+// is the shape that contract will need to satisfy.
+export interface CombatContract {
+  useAbility(abilityId: string, target: string): Promise<void>;
+  applyEffect(target: string, effect: string): Promise<void>;
+  startBattle(opponent: string, abilityIds: string[]): Promise<void>;
+  endBattle(battleId: string): Promise<void>;
+  getRandomNumber(): Promise<number>;
+  getUserTier(account: string): Promise<{
+    tier: Tier;
+    battlesCompleted: number;
+    tournamentsWon: number;
+    mentors: number;
+  }>;
+  unlockTier(tier: Tier): Promise<void>;
+  enterRealm(realmId: string): Promise<void>;
+  mentorPlayer(playerAddress: string): Promise<void>;
+}
 
 interface Web3ContextType {
   provider: ethers.BrowserProvider | null;
@@ -12,6 +45,8 @@ interface Web3ContextType {
   businessProfile: BusinessProfile | null;
   realmSystem: RealmSystem | null;
   iceToken: IceToken | null;
+  // On-chain combat contract (see CombatContract above). Null until one exists.
+  contract: CombatContract | null;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
   isConnected: boolean;
@@ -25,6 +60,7 @@ const Web3Context = createContext<Web3ContextType>({
   businessProfile: null,
   realmSystem: null,
   iceToken: null,
+  contract: null,
   connectWallet: async () => {},
   disconnectWallet: () => {},
   isConnected: false,
@@ -55,30 +91,28 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({ children
         setAccount(address);
         setIsConnected(true);
 
-        // Initialize contracts
-        const userManagementContract = new ethers.Contract(
+        // Initialize contracts via the typechain factories, which return
+        // the correctly typed contract instances (a plain `new
+        // ethers.Contract(...) as X` cast is rejected by the checker).
+        const userManagementContract = UserManagement__factory.connect(
           process.env.REACT_APP_USER_MANAGEMENT_ADDRESS || '',
-          UserManagement.abi,
           signer
-        ) as UserManagement;
+        );
 
-        const businessProfileContract = new ethers.Contract(
+        const businessProfileContract = BusinessProfile__factory.connect(
           process.env.REACT_APP_BUSINESS_PROFILE_ADDRESS || '',
-          BusinessProfile.abi,
           signer
-        ) as BusinessProfile;
+        );
 
-        const realmSystemContract = new ethers.Contract(
+        const realmSystemContract = RealmSystem__factory.connect(
           process.env.REACT_APP_REALM_SYSTEM_ADDRESS || '',
-          RealmSystem.abi,
           signer
-        ) as RealmSystem;
+        );
 
-        const iceTokenContract = new ethers.Contract(
+        const iceTokenContract = IceToken__factory.connect(
           process.env.REACT_APP_ICE_TOKEN_ADDRESS || '',
-          IceToken.abi,
           signer
-        ) as IceToken;
+        );
 
         setUserManagement(userManagementContract);
         setBusinessProfile(businessProfileContract);
@@ -126,6 +160,7 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({ children
         businessProfile,
         realmSystem,
         iceToken,
+        contract: null,
         connectWallet,
         disconnectWallet,
         isConnected,
@@ -135,4 +170,4 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
     </Web3Context.Provider>
   );
-}; 
+};

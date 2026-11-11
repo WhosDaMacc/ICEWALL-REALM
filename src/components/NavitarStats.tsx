@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  LinearProgress,
-  Grid,
-  Chip,
-} from '@mui/material';
+import { Box, Card, CardContent, Typography, LinearProgress, Grid, Chip } from '@mui/material';
 
 interface NavitarStatsProps {
   navitar: {
@@ -32,7 +24,7 @@ const NavitarStats: React.FC<NavitarStatsProps> = ({ navitar }) => {
         <Typography variant="h5" gutterBottom>
           {navitar.name}
         </Typography>
-        
+
         <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle1" gutterBottom>
             Power Level
@@ -59,11 +51,7 @@ const NavitarStats: React.FC<NavitarStatsProps> = ({ navitar }) => {
             <Typography variant="subtitle1" gutterBottom>
               Special Ability
             </Typography>
-            <Chip
-              label={navitar.ability}
-              color="primary"
-              sx={{ mb: 1 }}
-            />
+            <Chip label={navitar.ability} color="primary" sx={{ mb: 1 }} />
             <Typography variant="body2" color="text.secondary">
               {navitar.description}
             </Typography>
@@ -86,9 +74,7 @@ const NavitarStats: React.FC<NavitarStatsProps> = ({ navitar }) => {
               </Typography>
             </Grid>
             <Grid item xs={6}>
-              <Typography variant="body2">
-                Speed: {Math.floor(navitar.powerLevel * 1.3)}
-              </Typography>
+              <Typography variant="body2">Speed: {Math.floor(navitar.powerLevel * 1.3)}</Typography>
             </Grid>
             <Grid item xs={6}>
               <Typography variant="body2">
@@ -102,4 +88,4 @@ const NavitarStats: React.FC<NavitarStatsProps> = ({ navitar }) => {
   );
 };
 
-export default NavitarStats; 
+export default NavitarStats;

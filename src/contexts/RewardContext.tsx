@@ -37,8 +37,12 @@ interface RewardContextType {
   availableRewards: Reward[];
   activeRivals: RivalAvatar[];
   claimReward: (rewardId: string) => void;
+  addReward: (reward: Omit<Reward, 'id' | 'status'>) => void;
   updateRivalStatus: (rivalId: string, status: RivalAvatar['status']) => void;
-  getNearbyRivals: (location: { latitude: number; longitude: number }, radius?: number) => RivalAvatar[];
+  getNearbyRivals: (
+    location: { latitude: number; longitude: number },
+    radius?: number
+  ) => RivalAvatar[];
   addRivalSighting: (rival: Omit<RivalAvatar, 'id' | 'status'>) => void;
   refreshRewards: () => void;
   getLocationRewards: (location: { latitude: number; longitude: number }) => Reward[];
@@ -50,6 +54,7 @@ const RewardContext = createContext<RewardContextType>({
   availableRewards: [],
   activeRivals: [],
   claimReward: () => {},
+  addReward: () => {},
   updateRivalStatus: () => {},
   getNearbyRivals: () => [],
   addRivalSighting: () => {},
@@ -65,64 +70,76 @@ export const RewardProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const { currentRealm } = useRealm();
 
   // Calculate distance between two points in meters
-  const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371e3; // Earth's radius in meters
-    const φ1 = lat1 * Math.PI/180;
-    const φ2 = lat2 * Math.PI/180;
-    const Δφ = (lat2-lat1) * Math.PI/180;
-    const Δλ = (lon2-lon1) * Math.PI/180;
+  const calculateDistance = useCallback(
+    (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+      const R = 6371e3; // Earth's radius in meters
+      const φ1 = (lat1 * Math.PI) / 180;
+      const φ2 = (lat2 * Math.PI) / 180;
+      const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+      const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const a =
+        Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+        Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return R * c;
-  }, []);
-
-  const availableRewards = rewards.filter(reward => 
-    reward.status === 'available' && 
-    (!reward.expirationDate || new Date(reward.expirationDate) > new Date())
+      return R * c;
+    },
+    []
   );
 
-  const activeRivals = rivalAvatars.filter(rival => 
-    rival.status === 'active' && 
-    new Date(rival.lastSeen.timestamp).getTime() > Date.now() - 24 * 60 * 60 * 1000 // Last 24 hours
+  const availableRewards = rewards.filter(
+    reward =>
+      reward.status === 'available' &&
+      (!reward.expirationDate || new Date(reward.expirationDate) > new Date())
+  );
+
+  const activeRivals = rivalAvatars.filter(
+    rival =>
+      rival.status === 'active' &&
+      new Date(rival.lastSeen.timestamp).getTime() > Date.now() - 24 * 60 * 60 * 1000 // Last 24 hours
   );
 
   const claimReward = useCallback((rewardId: string) => {
-    setRewards(prev => 
-      prev.map(reward => 
-        reward.id === rewardId 
-          ? { ...reward, status: 'claimed' }
-          : reward
-      )
+    setRewards(prev =>
+      prev.map(reward => (reward.id === rewardId ? { ...reward, status: 'claimed' } : reward))
     );
+  }, []);
+
+  // A battle victory mints a new reward (NavitarFightClub calls this on
+  // completeBattle). Mirrors addRivalSighting: the caller supplies
+  // everything except id/status, which are assigned here.
+  const addReward = useCallback((reward: Omit<Reward, 'id' | 'status'>) => {
+    const newReward: Reward = {
+      ...reward,
+      id: Date.now().toString(),
+      status: 'available',
+    };
+    setRewards(prev => [...prev, newReward]);
   }, []);
 
   const updateRivalStatus = useCallback((rivalId: string, status: RivalAvatar['status']) => {
-    setRivalAvatars(prev => 
-      prev.map(rival => 
-        rival.id === rivalId 
-          ? { ...rival, status }
-          : rival
-      )
+    setRivalAvatars(prev =>
+      prev.map(rival => (rival.id === rivalId ? { ...rival, status } : rival))
     );
   }, []);
 
-  const getNearbyRivals = useCallback((location: { latitude: number; longitude: number }, radius: number = 1000) => {
-    return activeRivals
-      .filter(rival => {
-        const distance = calculateDistance(
-          location.latitude,
-          location.longitude,
-          rival.lastSeen.location.latitude,
-          rival.lastSeen.location.longitude
-        );
-        return distance <= radius;
-      })
-      .sort((a, b) => b.rewardPoints - a.rewardPoints); // Sort by reward points
-  }, [activeRivals, calculateDistance]);
+  const getNearbyRivals = useCallback(
+    (location: { latitude: number; longitude: number }, radius: number = 1000) => {
+      return activeRivals
+        .filter(rival => {
+          const distance = calculateDistance(
+            location.latitude,
+            location.longitude,
+            rival.lastSeen.location.latitude,
+            rival.lastSeen.location.longitude
+          );
+          return distance <= radius;
+        })
+        .sort((a, b) => b.rewardPoints - a.rewardPoints); // Sort by reward points
+    },
+    [activeRivals, calculateDistance]
+  );
 
   const addRivalSighting = useCallback((rival: Omit<RivalAvatar, 'id' | 'status'>) => {
     const newRival: RivalAvatar = {
@@ -133,17 +150,21 @@ export const RewardProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setRivalAvatars(prev => [...prev, newRival]);
   }, []);
 
-  const getLocationRewards = useCallback((location: { latitude: number; longitude: number }) => {
-    return availableRewards.filter(reward => 
-      reward.location && 
-      calculateDistance(
-        location.latitude,
-        location.longitude,
-        reward.location.latitude,
-        reward.location.longitude
-      ) <= reward.location.radius
-    );
-  }, [availableRewards, calculateDistance]);
+  const getLocationRewards = useCallback(
+    (location: { latitude: number; longitude: number }) => {
+      return availableRewards.filter(
+        reward =>
+          reward.location &&
+          calculateDistance(
+            location.latitude,
+            location.longitude,
+            reward.location.latitude,
+            reward.location.longitude
+          ) <= reward.location.radius
+      );
+    },
+    [availableRewards, calculateDistance]
+  );
 
   const refreshRewards = useCallback(() => {
     // Generate new rewards based on realm activity
@@ -175,8 +196,8 @@ export const RewardProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           points: 200,
           status: 'available',
           location: {
-            latitude: currentRealm.latitude,
-            longitude: currentRealm.longitude,
+            latitude: currentRealm.location.lat,
+            longitude: currentRealm.location.lng,
             radius: 100, // 100 meters radius
           },
         },
@@ -194,6 +215,7 @@ export const RewardProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         availableRewards,
         activeRivals,
         claimReward,
+        addReward,
         updateRivalStatus,
         getNearbyRivals,
         addRivalSighting,
@@ -204,4 +226,4 @@ export const RewardProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       {children}
     </RewardContext.Provider>
   );
-}; 
+};

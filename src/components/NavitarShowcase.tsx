@@ -1,8 +1,8 @@
 import React from 'react';
 import { Box, Grid, Typography, Container } from '@mui/material';
-import { NavitarDesign } from './NavitarDesign';
+import { NavitarDesign, type NavitarDesignProps } from './NavitarDesign';
 
-const sampleNavitars = [
+const sampleNavitars: NavitarDesignProps[] = [
   {
     name: 'Frostbite',
     type: 'ice',
@@ -12,8 +12,8 @@ const sampleNavitars = [
       health: 85,
       attack: 70,
       defense: 65,
-      speed: 75
-    }
+      speed: 75,
+    },
   },
   {
     name: 'Emberwing',
@@ -24,8 +24,8 @@ const sampleNavitars = [
       health: 75,
       attack: 90,
       defense: 60,
-      speed: 85
-    }
+      speed: 85,
+    },
   },
   {
     name: 'Leafblade',
@@ -36,8 +36,8 @@ const sampleNavitars = [
       health: 70,
       attack: 65,
       defense: 70,
-      speed: 60
-    }
+      speed: 60,
+    },
   },
   {
     name: 'Shadowmaw',
@@ -48,8 +48,8 @@ const sampleNavitars = [
       health: 90,
       attack: 95,
       defense: 80,
-      speed: 70
-    }
+      speed: 70,
+    },
   },
   {
     name: 'Luminara',
@@ -60,9 +60,61 @@ const sampleNavitars = [
       health: 80,
       attack: 75,
       defense: 85,
-      speed: 80
-    }
-  }
+      speed: 80,
+    },
+  },
+  {
+    name: 'Quantix',
+    type: 'quantum',
+    level: 22,
+    rarity: 'epic',
+    stats: {
+      health: 80,
+      attack: 88,
+      defense: 70,
+      speed: 90,
+    },
+    imageUrl: `${process.env.PUBLIC_URL}/navitars/quantix.webp`,
+  },
+  {
+    name: 'Voltwing',
+    type: 'electric',
+    level: 19,
+    rarity: 'epic',
+    stats: {
+      health: 72,
+      attack: 85,
+      defense: 60,
+      speed: 95,
+    },
+    imageUrl: `${process.env.PUBLIC_URL}/navitars/voltwing.webp`,
+  },
+  {
+    name: 'Spiritmaw',
+    type: 'spiritual',
+    level: 24,
+    rarity: 'legendary',
+    stats: {
+      health: 95,
+      attack: 80,
+      defense: 88,
+      speed: 65,
+    },
+    imageUrl: `${process.env.PUBLIC_URL}/navitars/spiritmaw.webp`,
+  },
+  {
+    name: 'Tidefang',
+    type: 'water',
+    level: 17,
+    rarity: 'rare',
+    stats: {
+      health: 82,
+      attack: 78,
+      defense: 75,
+      speed: 80,
+    },
+    imageUrl: `${process.env.PUBLIC_URL}/navitars/tidefang.webp`,
+  },
 ];
 
 export const NavitarShowcase: React.FC = () => {
@@ -74,7 +126,7 @@ export const NavitarShowcase: React.FC = () => {
       <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 4 }}>
         Discover unique creatures with special abilities and characteristics
       </Typography>
-      
+
       <Grid container spacing={3}>
         {sampleNavitars.map((navitar, index) => (
           <Grid item xs={12} sm={6} md={4} key={index}>
@@ -102,4 +154,4 @@ export const NavitarShowcase: React.FC = () => {
       </Box>
     </Container>
   );
-}; 
+};

@@ -1,12 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Grid, Typography, Button, Card, CardContent, CardMedia, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Alert } from '@mui/material';
+import {
+  Box,
+  Grid,
+  Typography,
+  Button,
+  Card,
+  CardContent,
+  CardMedia,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Snackbar,
+  Alert,
+} from '@mui/material';
 import { useWeb3 } from '../contexts/Web3Context';
 import { Navitar } from '../data/navitars';
 
 interface Item {
   id: string;
   name: string;
-  type: 'consumable' | 'equipment' | 'collectible' | 'nft' | 'power_up' | 'shield' | 'special_attack';
+  type:
+    'consumable' | 'equipment' | 'collectible' | 'nft' | 'power_up' | 'shield' | 'special_attack';
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
   description: string;
   imageUrl: string;
@@ -185,7 +202,7 @@ const ItemSystem: React.FC = () => {
             ...newInventory.activePowerUps,
             [navitar.id]: {
               power: item.effects.power,
-              expires: new Date(Date.now() + (item.duration! * 1000)),
+              expires: new Date(Date.now() + item.duration! * 1000),
             },
           };
         }
@@ -198,7 +215,7 @@ const ItemSystem: React.FC = () => {
             [navitar.id]: {
               shield: item.effects.shield.amount,
               type: item.effects.shield.type,
-              expires: new Date(Date.now() + (item.duration! * 1000)),
+              expires: new Date(Date.now() + item.duration! * 1000),
             },
           };
         }
@@ -210,7 +227,7 @@ const ItemSystem: React.FC = () => {
             ...newInventory.specialAttacks,
             [navitar.id]: {
               attack: item.effects.specialAttack.name,
-              cooldown: new Date(Date.now() + (item.effects.specialAttack.cooldown * 1000)),
+              cooldown: new Date(Date.now() + item.effects.specialAttack.cooldown * 1000),
             },
           };
         }
@@ -229,10 +246,7 @@ const ItemSystem: React.FC = () => {
       if (resultItem) {
         setInventory(prev => ({
           ...prev,
-          items: [
-            ...prev.items.filter(i => !items.includes(i)),
-            resultItem,
-          ],
+          items: [...prev.items.filter(i => !items.includes(i)), resultItem],
         }));
       }
     }
@@ -255,7 +269,7 @@ const ItemSystem: React.FC = () => {
   const acceptTradeOffer = (offerId: string) => {
     setInventory(prev => ({
       ...prev,
-      tradeOffers: prev.tradeOffers.map(offer => 
+      tradeOffers: prev.tradeOffers.map(offer =>
         offer.id === offerId ? { ...offer, status: 'accepted' } : offer
       ),
     }));
@@ -267,9 +281,18 @@ const ItemSystem: React.FC = () => {
     const specialAttack = inventory.specialAttacks[navitarId];
 
     return {
-      powerUp: powerUp && new Date() < powerUp.expires ? { power: powerUp.power, expires: powerUp.expires } : null,
-      shield: shield && new Date() < shield.expires ? { shield: shield.shield, type: shield.type, expires: shield.expires } : null,
-      specialAttack: specialAttack && new Date() < specialAttack.cooldown ? { attack: specialAttack.attack, cooldown: specialAttack.cooldown } : null,
+      powerUp:
+        powerUp && new Date() < powerUp.expires
+          ? { power: powerUp.power, expires: powerUp.expires }
+          : null,
+      shield:
+        shield && new Date() < shield.expires
+          ? { shield: shield.shield, type: shield.type, expires: shield.expires }
+          : null,
+      specialAttack:
+        specialAttack && new Date() < specialAttack.cooldown
+          ? { attack: specialAttack.attack, cooldown: specialAttack.cooldown }
+          : null,
     };
   };
 
@@ -285,31 +308,30 @@ const ItemSystem: React.FC = () => {
             Inventory ({inventory.items.length}/{inventory.capacity})
           </Typography>
           <Grid container spacing={2}>
-            {inventory.items.map((item) => (
+            {inventory.items.map(item => (
               <Grid xs={12} sm={6} md={4} key={item.id}>
-                <Card 
+                <Card
                   sx={{ cursor: 'pointer' }}
                   onClick={() => {
                     setSelectedItem(item);
                     setShowItemDialog(true);
                   }}
                 >
-                  <CardMedia
-                    component="img"
-                    height="140"
-                    image={item.imageUrl}
-                    alt={item.name}
-                  />
+                  <CardMedia component="img" height="140" image={item.imageUrl} alt={item.name} />
                   <CardContent>
                     <Typography gutterBottom variant="h6" component="div">
                       {item.name}
                     </Typography>
-                    <Chip 
-                      label={item.rarity} 
+                    <Chip
+                      label={item.rarity}
                       color={
-                        item.rarity === 'legendary' ? 'error' :
-                        item.rarity === 'epic' ? 'secondary' :
-                        item.rarity === 'rare' ? 'primary' : 'default'
+                        item.rarity === 'legendary'
+                          ? 'error'
+                          : item.rarity === 'epic'
+                            ? 'secondary'
+                            : item.rarity === 'rare'
+                              ? 'primary'
+                              : 'default'
                       }
                       size="small"
                       sx={{ mb: 1 }}
@@ -337,9 +359,7 @@ const ItemSystem: React.FC = () => {
             {selectedNavitar && (
               <Card sx={{ mb: 2 }}>
                 <CardContent>
-                  <Typography variant="subtitle1">
-                    {selectedNavitar.name}
-                  </Typography>
+                  <Typography variant="subtitle1">{selectedNavitar.name}</Typography>
                   {Object.entries(getActiveEffects(selectedNavitar.id)).map(([type, effect]) => {
                     if (!effect) return null;
                     return (
@@ -360,14 +380,12 @@ const ItemSystem: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               Trade Offers
             </Typography>
-            {inventory.tradeOffers.map((offer) => (
+            {inventory.tradeOffers.map(offer => (
               <Card key={offer.id} sx={{ mb: 1 }}>
                 <CardContent>
-                  <Typography variant="subtitle1">
-                    From: {offer.from}
-                  </Typography>
-                  <Button 
-                    variant="contained" 
+                  <Typography variant="subtitle1">From: {offer.from}</Typography>
+                  <Button
+                    variant="contained"
                     onClick={() => acceptTradeOffer(offer.id)}
                     disabled={offer.status !== 'pending'}
                   >
@@ -396,8 +414,8 @@ const ItemSystem: React.FC = () => {
         </Box>
       )}
 
-      <Dialog 
-        open={showItemDialog} 
+      <Dialog
+        open={showItemDialog}
         onClose={() => setShowItemDialog(false)}
         maxWidth="sm"
         fullWidth
@@ -407,8 +425,8 @@ const ItemSystem: React.FC = () => {
             <DialogTitle>{selectedItem.name}</DialogTitle>
             <DialogContent>
               <Box sx={{ mb: 2 }}>
-                <img 
-                  src={selectedItem.imageUrl} 
+                <img
+                  src={selectedItem.imageUrl}
                   alt={selectedItem.name}
                   style={{ width: '100%', height: 'auto' }}
                 />
@@ -445,20 +463,14 @@ const ItemSystem: React.FC = () => {
                         </Box>
                       );
                     }
-                    return (
-                      <Chip 
-                        key={key}
-                        label={`${key}: ${value}`}
-                        sx={{ mr: 1, mb: 1 }}
-                      />
-                    );
+                    return <Chip key={key} label={`${key}: ${value}`} sx={{ mr: 1, mb: 1 }} />;
                   })}
                 </Box>
               )}
             </DialogContent>
             <DialogActions>
-              <Button 
-                variant="contained" 
+              <Button
+                variant="contained"
                 onClick={() => {
                   if (selectedNavitar) {
                     handleItemUse(selectedItem, selectedNavitar);
@@ -469,10 +481,7 @@ const ItemSystem: React.FC = () => {
               >
                 Use Item
               </Button>
-              <Button 
-                variant="outlined" 
-                onClick={() => setShowTradeDialog(true)}
-              >
+              <Button variant="outlined" onClick={() => setShowTradeDialog(true)}>
                 Trade Item
               </Button>
             </DialogActions>
@@ -483,4 +492,4 @@ const ItemSystem: React.FC = () => {
   );
 };
 
-export default ItemSystem; 
+export default ItemSystem;

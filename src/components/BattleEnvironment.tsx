@@ -64,7 +64,7 @@ const BattleEnvironment: React.FC<BattleEnvironmentProps> = ({
   const createEnvironment = () => {
     const environment = document.createElement('a-entity');
     const preset = getEnvironmentPreset();
-    
+
     environment.setAttribute('environment', {
       preset,
       skyType: 'atmosphere',
@@ -123,14 +123,14 @@ const BattleEnvironment: React.FC<BattleEnvironmentProps> = ({
 
   const createTerrain = () => {
     const terrain = document.createElement('a-entity');
-    
+
     // Base terrain
     terrain.setAttribute('geometry', {
       primitive: 'plane',
       width: 100,
       height: 100,
     });
-    
+
     terrain.setAttribute('material', {
       shader: 'standard',
       color: getGroundColor(),
@@ -213,7 +213,7 @@ const BattleEnvironment: React.FC<BattleEnvironmentProps> = ({
 
   const createWeatherEffects = () => {
     const weather = document.createElement('a-entity');
-    
+
     switch (attacker.type) {
       case 'healer':
         weather.setAttribute('particle-system', {
@@ -270,71 +270,106 @@ const BattleEnvironment: React.FC<BattleEnvironmentProps> = ({
 
   const getEnvironmentPreset = () => {
     switch (attacker.type) {
-      case 'healer': return 'forest';
-      case 'attacker': return 'volcano';
-      case 'defender': return 'mountain';
-      case 'support': return 'starry';
-      default: return 'default';
+      case 'healer':
+        return 'forest';
+      case 'attacker':
+        return 'volcano';
+      case 'defender':
+        return 'mountain';
+      case 'support':
+        return 'starry';
+      default:
+        return 'default';
     }
   };
 
   const getTimeOfDay = () => {
     switch (attacker.type) {
-      case 'healer': return 'morning';
-      case 'attacker': return 'night';
-      case 'defender': return 'sunset';
-      case 'support': return 'twilight';
-      default: return 'day';
+      case 'healer':
+        return 'morning';
+      case 'attacker':
+        return 'night';
+      case 'defender':
+        return 'sunset';
+      case 'support':
+        return 'twilight';
+      default:
+        return 'day';
     }
   };
 
   const getEnvironmentDressing = () => {
     switch (attacker.type) {
-      case 'healer': return 'trees';
-      case 'attacker': return 'towers';
-      case 'defender': return 'stones';
-      case 'support': return 'mushrooms';
-      default: return 'none';
+      case 'healer':
+        return 'trees';
+      case 'attacker':
+        return 'towers';
+      case 'defender':
+        return 'stones';
+      case 'support':
+        return 'mushrooms';
+      default:
+        return 'none';
     }
   };
 
   const getEnvironmentColor = () => {
     switch (attacker.type) {
-      case 'healer': return '#1A5D1A';
-      case 'attacker': return '#8B0000';
-      case 'defender': return '#4A4A4A';
-      case 'support': return '#4B0082';
-      default: return '#666666';
+      case 'healer':
+        return '#1A5D1A';
+      case 'attacker':
+        return '#8B0000';
+      case 'defender':
+        return '#4A4A4A';
+      case 'support':
+        return '#4B0082';
+      default:
+        return '#666666';
     }
   };
 
   const getGroundColor = () => {
     switch (attacker.type) {
-      case 'healer': return '#2E8B57';
-      case 'attacker': return '#8B4513';
-      case 'defender': return '#708090';
-      case 'support': return '#483D8B';
-      default: return '#A0522D';
+      case 'healer':
+        return '#2E8B57';
+      case 'attacker':
+        return '#8B4513';
+      case 'defender':
+        return '#708090';
+      case 'support':
+        return '#483D8B';
+      default:
+        return '#A0522D';
     }
   };
 
   const getGroundColor2 = () => {
     switch (attacker.type) {
-      case 'healer': return '#228B22';
-      case 'attacker': return '#A0522D';
-      case 'defender': return '#778899';
-      case 'support': return '#6A5ACD';
-      default: return '#8B4513';
+      case 'healer':
+        return '#228B22';
+      case 'attacker':
+        return '#A0522D';
+      case 'defender':
+        return '#778899';
+      case 'support':
+        return '#6A5ACD';
+      default:
+        return '#8B4513';
     }
   };
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'healer': return '#00FF00';
-      case 'attacker': return '#FF0000';
-      case 'defender': return '#0000FF';
-      case 'support': return '#800080';
-      default: return '#FFFFFF';
+      case 'healer':
+        return '#00FF00';
+      case 'attacker':
+        return '#FF0000';
+      case 'defender':
+        return '#0000FF';
+      case 'support':
+        return '#800080';
+      default:
+        return '#FFFFFF';
     }
   };
 
@@ -358,4 +393,4 @@ const BattleEnvironment: React.FC<BattleEnvironmentProps> = ({
   );
 };
 
-export default BattleEnvironment; 
+export default BattleEnvironment;

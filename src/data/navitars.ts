@@ -157,8 +157,8 @@ export const navitars: Navitar[] = [
   {
     id: 'selenara',
     name: 'Selenara',
-    ability: 'Water\'s Caress',
-    description: 'Creates soothing mists that enhance allies\' recovery.',
+    ability: "Water's Caress",
+    description: "Creates soothing mists that enhance allies' recovery.",
     powerLevel: 5,
     type: 'healer',
     particleEffect: 'mist',
@@ -190,4 +190,4 @@ export const navitars: Navitar[] = [
     type: 'support',
     particleEffect: 'dance',
   },
-]; 
+];

@@ -217,4 +217,4 @@ const EpicBattleEffects: React.FC<EpicBattleEffectsProps> = ({
   );
 };
 
-export default EpicBattleEffects; 
+export default EpicBattleEffects;

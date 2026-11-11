@@ -3,7 +3,8 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 export interface Navitar {
   id: string;
   name: string;
-  type: 'ice' | 'fire' | 'nature' | 'shadow' | 'light';
+  type:
+    'ice' | 'fire' | 'nature' | 'shadow' | 'light' | 'quantum' | 'electric' | 'spiritual' | 'water';
   level: number;
   health: number;
   energy: number;
@@ -14,7 +15,8 @@ export interface Navitar {
 
 export interface Move {
   name: string;
-  type: 'ice' | 'fire' | 'nature' | 'shadow' | 'light';
+  type:
+    'ice' | 'fire' | 'nature' | 'shadow' | 'light' | 'quantum' | 'electric' | 'spiritual' | 'water';
   damage: number;
   energyCost: number;
   cooldown: number;
@@ -48,23 +50,23 @@ export const NavitarProvider: React.FC<{ children: ReactNode }> = ({ children })
   };
 
   const updateNavitar = (id: string, updates: Partial<Navitar>) => {
-    setNavitars(prev => prev.map(n => 
-      n.id === id ? { ...n, ...updates } : n
-    ));
+    setNavitars(prev => prev.map(n => (n.id === id ? { ...n, ...updates } : n)));
     if (selectedNavitar?.id === id) {
-      setSelectedNavitar(prev => prev ? { ...prev, ...updates } : null);
+      setSelectedNavitar(prev => (prev ? { ...prev, ...updates } : null));
     }
   };
 
   return (
-    <NavitarContext.Provider value={{
-      selectedNavitar,
-      setSelectedNavitar,
-      navitars,
-      addNavitar,
-      removeNavitar,
-      updateNavitar
-    }}>
+    <NavitarContext.Provider
+      value={{
+        selectedNavitar,
+        setSelectedNavitar,
+        navitars,
+        addNavitar,
+        removeNavitar,
+        updateNavitar,
+      }}
+    >
       {children}
     </NavitarContext.Provider>
   );
@@ -76,4 +78,4 @@ export const useNavitar = () => {
     throw new Error('useNavitar must be used within a NavitarProvider');
   }
   return context;
-}; 
+};

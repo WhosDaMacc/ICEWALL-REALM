@@ -4,7 +4,8 @@ import { styled, keyframes } from '@mui/material/styles';
 
 interface Navitar {
   name: string;
-  type: 'ice' | 'fire' | 'nature' | 'shadow' | 'light';
+  type:
+    'ice' | 'fire' | 'nature' | 'shadow' | 'light' | 'quantum' | 'electric' | 'spiritual' | 'water';
   health: number;
   maxHealth: number;
   energy: number;
@@ -54,28 +55,48 @@ const StatusContainer = styled(Box)(({ theme }) => ({
   '&:hover': {
     transform: 'translateY(-2px)',
     boxShadow: '0 6px 8px rgba(0, 0, 0, 0.2)',
-  }
+  },
 }));
 
 const getTypeColor = (type: string) => {
   switch (type) {
-    case 'ice': return '#81D4FA';
-    case 'fire': return '#FF5722';
-    case 'nature': return '#4CAF50';
-    case 'shadow': return '#9C27B0';
-    case 'light': return '#FFC107';
-    default: return '#2196F3';
+    case 'ice':
+      return '#81D4FA';
+    case 'fire':
+      return '#FF5722';
+    case 'nature':
+      return '#4CAF50';
+    case 'shadow':
+      return '#9C27B0';
+    case 'light':
+      return '#FFC107';
+    case 'quantum':
+      return '#B388FF';
+    case 'electric':
+      return '#FFEA00';
+    case 'spiritual':
+      return '#80DEEA';
+    case 'water':
+      return '#2196F3';
+    default:
+      return '#2196F3';
   }
 };
 
 const getStatusColor = (type: string) => {
   switch (type) {
-    case 'burn': return '#FF5722';
-    case 'freeze': return '#81D4FA';
-    case 'poison': return '#9C27B0';
-    case 'regeneration': return '#4CAF50';
-    case 'empower': return '#FFC107';
-    default: return '#2196F3';
+    case 'burn':
+      return '#FF5722';
+    case 'freeze':
+      return '#81D4FA';
+    case 'poison':
+      return '#9C27B0';
+    case 'regeneration':
+      return '#4CAF50';
+    case 'empower':
+      return '#FFC107';
+    default:
+      return '#2196F3';
   }
 };
 
@@ -95,7 +116,7 @@ const StyledLinearProgress = styled(LinearProgress)(({ theme }) => ({
     background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)',
     backgroundSize: '200% 100%',
     animation: '${pulse} 2s infinite',
-  }
+  },
 }));
 
 const DamagePreview = styled(Box)(({ theme }) => ({
@@ -115,23 +136,23 @@ export const BattleStatus: React.FC<BattleStatusProps> = ({
   playerNavitar,
   opponentNavitar,
   damagePreview,
-  isPlayerTurn
+  isPlayerTurn,
 }) => {
   const [healthAnimations, setHealthAnimations] = useState({
     player: false,
-    opponent: false
+    opponent: false,
   });
 
   useEffect(() => {
     if (damagePreview) {
       setHealthAnimations(prev => ({
         ...prev,
-        [damagePreview.target]: true
+        [damagePreview.target]: true,
       }));
       const timer = setTimeout(() => {
         setHealthAnimations(prev => ({
           ...prev,
-          [damagePreview.target]: false
+          [damagePreview.target]: false,
         }));
       }, 500);
       return () => clearTimeout(timer);
@@ -167,7 +188,9 @@ export const BattleStatus: React.FC<BattleStatusProps> = ({
       <StatusContainer
         sx={{
           borderColor: isActive ? getTypeColor(navitar.type) : 'rgba(255, 255, 255, 0.1)',
-          animation: healthAnimations[isPlayer ? 'player' : 'opponent'] ? `${shake} 0.5s ease-in-out` : 'none',
+          animation: healthAnimations[isPlayer ? 'player' : 'opponent']
+            ? `${shake} 0.5s ease-in-out`
+            : 'none',
         }}
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
@@ -178,11 +201,7 @@ export const BattleStatus: React.FC<BattleStatusProps> = ({
             <Typography variant="body2">
               {navitar.health}/{navitar.maxHealth} HP
             </Typography>
-            {showDamage && (
-              <DamagePreview>
-                -{damagePreview.amount}
-              </DamagePreview>
-            )}
+            {showDamage && <DamagePreview>-{damagePreview.amount}</DamagePreview>}
           </Box>
         </Box>
         <StyledLinearProgress
@@ -193,7 +212,7 @@ export const BattleStatus: React.FC<BattleStatusProps> = ({
             '& .MuiLinearProgress-bar': {
               backgroundColor: getTypeColor(navitar.type),
               transition: 'width 0.3s ease-in-out',
-            }
+            },
           }}
         />
         <StyledLinearProgress
@@ -204,7 +223,7 @@ export const BattleStatus: React.FC<BattleStatusProps> = ({
             '& .MuiLinearProgress-bar': {
               backgroundColor: '#FFD700',
               transition: 'width 0.3s ease-in-out',
-            }
+            },
           }}
         />
         {renderStatusEffects(navitar.statusEffects)}
@@ -218,4 +237,4 @@ export const BattleStatus: React.FC<BattleStatusProps> = ({
       {renderNavitarStatus(playerNavitar, true)}
     </Box>
   );
-}; 
+};

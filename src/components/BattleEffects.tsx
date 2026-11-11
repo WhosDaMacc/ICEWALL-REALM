@@ -34,14 +34,15 @@ const EffectContainer = styled(Box)(({ theme }) => ({
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'linear-gradient(45deg, transparent 20%, rgba(255,255,255,0.1) 40%, transparent 60%)',
+    background:
+      'linear-gradient(45deg, transparent 20%, rgba(255,255,255,0.1) 40%, transparent 60%)',
     backgroundSize: '200% 100%',
     animation: `${shimmer} 3s linear infinite`,
   },
 }));
 
-const EffectParticle = styled(Box)<{ 
-  type: string; 
+const EffectParticle = styled(Box)<{
+  type: string;
   intensity: number;
   variant: 'status' | 'environmental' | 'special';
 }>(({ theme, type, intensity, variant }) => {
@@ -81,7 +82,8 @@ const EffectParticle = styled(Box)<{
         };
       case 'special':
         return {
-          clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
+          clipPath:
+            'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
         };
       default:
         return {};
@@ -175,15 +177,13 @@ const BattleEffects: React.FC<BattleEffectsProps> = ({ effects, comboMeter }) =>
   return (
     <Box sx={{ position: 'relative', width: '100%' }}>
       <EffectContainer>
-        {effects.map((effect) => (
+        {effects.map(effect => (
           <React.Fragment key={effect.name}>
-            {effect.type === 'environmental' && (
-              <WeatherOverlay type={effect.name} />
-            )}
+            {effect.type === 'environmental' && <WeatherOverlay type={effect.name} />}
             {generateParticles(effect)}
           </React.Fragment>
         ))}
-        
+
         {/* Combo Effect */}
         {comboMeter > 50 && (
           <Box
@@ -206,7 +206,7 @@ const BattleEffects: React.FC<BattleEffectsProps> = ({ effects, comboMeter }) =>
 
       {/* Effect Labels */}
       <Box sx={{ mt: 2 }}>
-        {effects.map((effect) => (
+        {effects.map(effect => (
           <Typography
             key={effect.name}
             variant="body2"
@@ -228,4 +228,4 @@ const BattleEffects: React.FC<BattleEffectsProps> = ({ effects, comboMeter }) =>
   );
 };
 
-export default BattleEffects; 
+export default BattleEffects;

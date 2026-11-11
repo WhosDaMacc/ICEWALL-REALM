@@ -50,3 +50,6 @@ deployments/localhost
 .env.development.local
 .env.test.local
 .env.production.local 
+# local working files (not part of the app)
+icewall-realm-single.html
+navitar-art/

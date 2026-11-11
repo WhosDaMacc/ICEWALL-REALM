@@ -10,7 +10,7 @@ interface PortalEntryAnimationProps {
 
 export const PortalEntryAnimation: React.FC<PortalEntryAnimationProps> = ({
   portalType,
-  onComplete
+  onComplete,
 }) => {
   const theme = useTheme();
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -31,12 +31,18 @@ export const PortalEntryAnimation: React.FC<PortalEntryAnimationProps> = ({
 
   const getPortalColor = () => {
     switch (portalType) {
-      case 'ice': return theme.palette.primary.main;
-      case 'fire': return theme.palette.error.main;
-      case 'nature': return theme.palette.success.main;
-      case 'shadow': return theme.palette.grey[900];
-      case 'light': return theme.palette.warning.main;
-      default: return theme.palette.primary.main;
+      case 'ice':
+        return theme.palette.primary.main;
+      case 'fire':
+        return theme.palette.error.main;
+      case 'nature':
+        return theme.palette.success.main;
+      case 'shadow':
+        return theme.palette.grey[900];
+      case 'light':
+        return theme.palette.warning.main;
+      default:
+        return theme.palette.primary.main;
     }
   };
 
@@ -44,7 +50,7 @@ export const PortalEntryAnimation: React.FC<PortalEntryAnimationProps> = ({
     id: i,
     size: Math.random() * 20 + 10,
     delay: Math.random() * 0.5,
-    duration: Math.random() * 0.5 + 0.5
+    duration: Math.random() * 0.5 + 0.5,
   }));
 
   return (
@@ -59,7 +65,7 @@ export const PortalEntryAnimation: React.FC<PortalEntryAnimationProps> = ({
         alignItems: 'center',
         justifyContent: 'center',
         bgcolor: 'rgba(0, 0, 0, 0.8)',
-        zIndex: 9999
+        zIndex: 9999,
       }}
     >
       <AnimatePresence>
@@ -77,7 +83,7 @@ export const PortalEntryAnimation: React.FC<PortalEntryAnimationProps> = ({
               height: 300,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
             }}
           >
             {/* Portal Ring */}
@@ -87,16 +93,16 @@ export const PortalEntryAnimation: React.FC<PortalEntryAnimationProps> = ({
                 width: '100%',
                 height: '100%',
                 border: `4px solid ${getPortalColor()}`,
-                borderRadius: '50%'
+                borderRadius: '50%',
               }}
               animate={{
                 rotate: 360,
-                scale: [1, 1.2, 1]
+                scale: [1, 1.2, 1],
               }}
               transition={{
                 duration: 2,
                 repeat: Infinity,
-                ease: 'linear'
+                ease: 'linear',
               }}
             />
 
@@ -107,21 +113,21 @@ export const PortalEntryAnimation: React.FC<PortalEntryAnimationProps> = ({
                 height: '60%',
                 backgroundColor: getPortalColor(),
                 borderRadius: '50%',
-                opacity: 0.8
+                opacity: 0.8,
               }}
               animate={{
                 scale: [1, 1.1, 1],
-                opacity: [0.8, 1, 0.8]
+                opacity: [0.8, 1, 0.8],
               }}
               transition={{
                 duration: 1.5,
                 repeat: Infinity,
-                ease: 'easeInOut'
+                ease: 'easeInOut',
               }}
             />
 
             {/* Particles */}
-            {particles.map((particle) => (
+            {particles.map(particle => (
               <motion.div
                 key={particle.id}
                 style={{
@@ -130,27 +136,19 @@ export const PortalEntryAnimation: React.FC<PortalEntryAnimationProps> = ({
                   height: particle.size,
                   backgroundColor: getPortalColor(),
                   borderRadius: '50%',
-                  opacity: 0.8
+                  opacity: 0.8,
                 }}
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{
                   scale: [0, 1, 0],
                   opacity: [0, 0.8, 0],
-                  x: [
-                    0,
-                    (Math.random() - 0.5) * 200,
-                    (Math.random() - 0.5) * 400
-                  ],
-                  y: [
-                    0,
-                    (Math.random() - 0.5) * 200,
-                    (Math.random() - 0.5) * 400
-                  ]
+                  x: [0, (Math.random() - 0.5) * 200, (Math.random() - 0.5) * 400],
+                  y: [0, (Math.random() - 0.5) * 200, (Math.random() - 0.5) * 400],
                 }}
                 transition={{
                   duration: particle.duration,
                   delay: particle.delay,
-                  repeat: Infinity
+                  repeat: Infinity,
                 }}
               />
             ))}
@@ -162,7 +160,7 @@ export const PortalEntryAnimation: React.FC<PortalEntryAnimationProps> = ({
                 position: 'absolute',
                 color: 'white',
                 textShadow: `0 0 10px ${getPortalColor()}`,
-                fontWeight: 'bold'
+                fontWeight: 'bold',
               }}
             >
               Entering {portalType.toUpperCase()} Realm
@@ -172,4 +170,4 @@ export const PortalEntryAnimation: React.FC<PortalEntryAnimationProps> = ({
       </AnimatePresence>
     </Box>
   );
-}; 
+};

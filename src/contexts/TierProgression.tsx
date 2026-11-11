@@ -136,6 +136,8 @@ export const TierProgressionProvider: React.FC<{ children: React.ReactNode }> = 
   }, [account, contract]);
 
   const loadTierProgress = async () => {
+    // No contract yet (and no account): keep the local defaults.
+    if (!account || !contract) return;
     try {
       // Load user's tier and progress from contract
       const tierData = await contract.getUserTier(account);
@@ -158,8 +160,11 @@ export const TierProgressionProvider: React.FC<{ children: React.ReactNode }> = 
         throw new Error('Requirements not met for this tier');
       }
 
-      // Call contract to unlock tier
-      await contract.unlockTier(tier);
+      // Call contract to unlock tier (skipped until a combat contract
+      // exists — the tier still updates locally, as in CombatContext).
+      if (contract) {
+        await contract.unlockTier(tier);
+      }
       setCurrentTier(tier);
     } catch (error) {
       console.error('Error unlocking tier:', error);
@@ -169,11 +174,46 @@ export const TierProgressionProvider: React.FC<{ children: React.ReactNode }> = 
 
   const checkTierRequirements = async (tier: Tier): Promise<boolean> => {
     const tierRequirements = {
-      mortal: { battlesCompleted: 0, iceStaked: 0, tournamentsWon: 0, rank: 0, mentors: 0, iceHeld: 0 },
-      ascendant: { battlesCompleted: 10, iceStaked: 100, tournamentsWon: 0, rank: 0, mentors: 0, iceHeld: 0 },
-      interdimensional: { battlesCompleted: 20, iceStaked: 500, tournamentsWon: 3, rank: 0, mentors: 0, iceHeld: 0 },
-      celestial: { battlesCompleted: 50, iceStaked: 1000, tournamentsWon: 10, rank: 100, mentors: 5, iceHeld: 0 },
-      primordial: { battlesCompleted: 100, iceStaked: 5000, tournamentsWon: 20, rank: 10, mentors: 10, iceHeld: 10000 },
+      mortal: {
+        battlesCompleted: 0,
+        iceStaked: 0,
+        tournamentsWon: 0,
+        rank: 0,
+        mentors: 0,
+        iceHeld: 0,
+      },
+      ascendant: {
+        battlesCompleted: 10,
+        iceStaked: 100,
+        tournamentsWon: 0,
+        rank: 0,
+        mentors: 0,
+        iceHeld: 0,
+      },
+      interdimensional: {
+        battlesCompleted: 20,
+        iceStaked: 500,
+        tournamentsWon: 3,
+        rank: 0,
+        mentors: 0,
+        iceHeld: 0,
+      },
+      celestial: {
+        battlesCompleted: 50,
+        iceStaked: 1000,
+        tournamentsWon: 10,
+        rank: 100,
+        mentors: 5,
+        iceHeld: 0,
+      },
+      primordial: {
+        battlesCompleted: 100,
+        iceStaked: 5000,
+        tournamentsWon: 20,
+        rank: 10,
+        mentors: 10,
+        iceHeld: 10000,
+      },
     };
 
     const requirements = tierRequirements[tier];
@@ -194,7 +234,9 @@ export const TierProgressionProvider: React.FC<{ children: React.ReactNode }> = 
         throw new Error('Interdimensional tier required');
       }
 
-      await contract.enterRealm(realmId);
+      if (contract) {
+        await contract.enterRealm(realmId);
+      }
       setCurrentRealm(realm);
     } catch (error) {
       console.error('Error entering realm:', error);
@@ -208,7 +250,9 @@ export const TierProgressionProvider: React.FC<{ children: React.ReactNode }> = 
 
   const mentorPlayer = async (playerAddress: string) => {
     try {
-      await contract.mentorPlayer(playerAddress);
+      if (contract) {
+        await contract.mentorPlayer(playerAddress);
+      }
       setProgress(prev => ({
         ...prev,
         mentors: prev.mentors + 1,
@@ -269,4 +313,4 @@ export const TierProgressionProvider: React.FC<{ children: React.ReactNode }> = 
       {children}
     </TierProgressionContext.Provider>
   );
-}; 
+};

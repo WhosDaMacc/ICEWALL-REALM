@@ -38,7 +38,7 @@ const AIAvatar: React.FC<AIAvatarProps> = ({ position, name, personality, onSpea
     utterance.pitch = 1.0;
 
     // Animate mouth while speaking
-    utterance.onboundary = (event) => {
+    utterance.onboundary = event => {
       if (event.name === 'word') {
         setMouthOpen(0.5);
         setTimeout(() => setMouthOpen(0), 100);
@@ -59,7 +59,7 @@ const AIAvatar: React.FC<AIAvatarProps> = ({ position, name, personality, onSpea
     if (isSpeaking) return;
 
     setAnimationState('listening');
-    
+
     try {
       // Here you would integrate with your AI service
       // For now, we'll use a simple response
@@ -87,7 +87,7 @@ const AIAvatar: React.FC<AIAvatarProps> = ({ position, name, personality, onSpea
     if (avatarRef.current) {
       // Add subtle breathing animation
       avatarRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime) * 0.02;
-      
+
       // Handle different animation states
       switch (animationState) {
         case 'listening':
@@ -128,4 +128,4 @@ const AIAvatar: React.FC<AIAvatarProps> = ({ position, name, personality, onSpea
   );
 };
 
-export default AIAvatar; 
+export default AIAvatar;

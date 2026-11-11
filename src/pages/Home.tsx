@@ -28,19 +28,11 @@ const Home: React.FC = () => {
               Enter a world of epic battles, powerful Navitars, and endless adventures.
             </Typography>
             <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
-              <Button
-                variant="contained"
-                size="large"
-                onClick={() => navigate('/collection')}
-              >
+              <Button variant="contained" size="large" onClick={() => navigate('/collection')}>
                 Start Your Journey
               </Button>
               {selectedNavitar && (
-                <Button
-                  variant="outlined"
-                  size="large"
-                  onClick={() => navigate('/battle')}
-                >
+                <Button variant="outlined" size="large" onClick={() => navigate('/battle')}>
                   Enter Battle
                 </Button>
               )}
@@ -95,15 +87,11 @@ const Home: React.FC = () => {
               </Grid>
               <Grid item xs={12} md={4}>
                 <Typography variant="h6">Special Moves</Typography>
-                <Typography>
-                  Store up to 3 special moves in your power meter
-                </Typography>
+                <Typography>Store up to 3 special moves in your power meter</Typography>
               </Grid>
               <Grid item xs={12} md={4}>
                 <Typography variant="h6">Tag Team Combos</Typography>
-                <Typography>
-                  Combine forces with other Navitars for epic battles
-                </Typography>
+                <Typography>Combine forces with other Navitars for epic battles</Typography>
               </Grid>
             </Grid>
           </Paper>
@@ -113,4 +101,4 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home; 
+export default Home;

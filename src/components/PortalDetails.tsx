@@ -14,9 +14,9 @@ import {
   DialogContent,
   DialogActions,
   Alert,
-  CircularProgress
+  CircularProgress,
 } from '@mui/material';
-import { Portal, PowerBolt, People, Info, Warning, CheckCircle } from '@mui/icons-material';
+import { DoorFront, Bolt, People, Info, Warning, CheckCircle } from '@mui/icons-material';
 import { PortalEntryAnimation } from './PortalEntryAnimation';
 
 export const PortalDetails: React.FC = () => {
@@ -30,9 +30,7 @@ export const PortalDetails: React.FC = () => {
     return (
       <Card sx={{ m: 2 }}>
         <CardContent>
-          <Typography color="text.secondary">
-            Select a portal to view details
-          </Typography>
+          <Typography color="text.secondary">Select a portal to view details</Typography>
         </CardContent>
       </Card>
     );
@@ -57,13 +55,13 @@ export const PortalDetails: React.FC = () => {
 
       // Show animation
       setShowAnimation(true);
-      
+
       // Simulate portal entry
       await new Promise(resolve => setTimeout(resolve, 3000));
-      
+
       // TODO: Implement actual portal entry logic
       console.log('Entering portal:', activePortal.id);
-      
+
       // Reset state after successful entry
       setActivePortal(null);
     } catch (error) {
@@ -101,18 +99,16 @@ export const PortalDetails: React.FC = () => {
         <CardContent>
           <Stack spacing={2}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Portal />
-              <Typography variant="h6">
-                {activePortal.name}
-              </Typography>
+              <DoorFront />
+              <Typography variant="h6">{activePortal.name}</Typography>
               <Chip
                 label={activePortal.type}
                 size="small"
                 sx={{
-                  bgcolor: (theme) => 
-                    theme.palette.mode === 'dark' 
-                      ? `${activePortal.type}.900` 
-                      : `${activePortal.type}.200`
+                  bgcolor: theme =>
+                    theme.palette.mode === 'dark'
+                      ? `${activePortal.type}.900`
+                      : `${activePortal.type}.200`,
                 }}
               />
             </Box>
@@ -126,7 +122,7 @@ export const PortalDetails: React.FC = () => {
                 Power Level
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <PowerBolt />
+                <Bolt />
                 <Box sx={{ flex: 1 }}>
                   <LinearProgress
                     variant="determinate"
@@ -134,9 +130,7 @@ export const PortalDetails: React.FC = () => {
                     color={powerLevelColor(activePortal.powerLevel)}
                   />
                 </Box>
-                <Typography variant="body2">
-                  {activePortal.powerLevel}%
-                </Typography>
+                <Typography variant="body2">{activePortal.powerLevel}%</Typography>
               </Box>
             </Box>
 
@@ -146,9 +140,7 @@ export const PortalDetails: React.FC = () => {
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <People />
-                <Typography>
-                  {activePortal.activeUsers} users
-                </Typography>
+                <Typography>{activePortal.activeUsers} users</Typography>
               </Box>
             </Box>
 
@@ -196,8 +188,8 @@ export const PortalDetails: React.FC = () => {
             </Box>
             {activePortal.powerLevel > 90 && (
               <Alert severity="warning" icon={<Warning />}>
-                This portal requires special authorization due to its high power level.
-                Please contact an administrator for access.
+                This portal requires special authorization due to its high power level. Please
+                contact an administrator for access.
               </Alert>
             )}
           </Stack>
@@ -205,8 +197,8 @@ export const PortalDetails: React.FC = () => {
         <DialogActions>
           <Button onClick={() => setShowRequirements(false)}>Close</Button>
           {activePortal.powerLevel <= 90 && (
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               onClick={() => {
                 setShowRequirements(false);
                 handleEnterPortal();
@@ -219,11 +211,8 @@ export const PortalDetails: React.FC = () => {
       </Dialog>
 
       {showAnimation && (
-        <PortalEntryAnimation
-          portalType={activePortal.type}
-          onComplete={handleAnimationComplete}
-        />
+        <PortalEntryAnimation portalType={activePortal.type} onComplete={handleAnimationComplete} />
       )}
     </>
   );
-}; 
+};

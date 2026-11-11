@@ -28,15 +28,7 @@ export interface NavitarCharacter {
   description: string;
 }
 
-export type NavitarType = 
-  | 'fire' 
-  | 'water' 
-  | 'earth' 
-  | 'air' 
-  | 'light' 
-  | 'dark' 
-  | 'tech' 
-  | 'nature';
+export type NavitarType = 'fire' | 'water' | 'earth' | 'air' | 'light' | 'dark' | 'tech' | 'nature';
 
 export type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
 
@@ -50,7 +42,7 @@ const rarityColors = {
   common: '#9E9E9E',
   rare: '#2196F3',
   epic: '#9C27B0',
-  legendary: '#FFD700'
+  legendary: '#FFD700',
 };
 
 const typeColors = {
@@ -61,18 +53,23 @@ const typeColors = {
   light: '#FFEB3B',
   dark: '#212121',
   tech: '#00BCD4',
-  nature: '#4CAF50'
+  nature: '#4CAF50',
+  ice: '#81D4FA',
+  shadow: '#9C27B0',
+  quantum: '#B388FF',
+  electric: '#FFEA00',
+  spiritual: '#80DEEA',
 };
 
-const NavitarCharacter: React.FC<NavitarCharacterProps> = ({ 
-  character, 
+const NavitarCharacter: React.FC<NavitarCharacterProps> = ({
+  character,
   size = 'medium',
-  onClick 
+  onClick,
 }) => {
   const sizeMap = {
     small: 64,
     medium: 96,
-    large: 128
+    large: 128,
   };
 
   return (
@@ -90,7 +87,7 @@ const NavitarCharacter: React.FC<NavitarCharacterProps> = ({
           border: `2px solid ${rarityColors[character.rarity]}`,
           background: `linear-gradient(45deg, ${typeColors[character.type]}20, ${rarityColors[character.rarity]}20)`,
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -101,7 +98,7 @@ const NavitarCharacter: React.FC<NavitarCharacterProps> = ({
               width: sizeMap[size],
               height: sizeMap[size],
               border: `3px solid ${typeColors[character.type]}`,
-              bgcolor: `${typeColors[character.type]}20`
+              bgcolor: `${typeColors[character.type]}20`,
             }}
           />
           <Box>
@@ -119,7 +116,7 @@ const NavitarCharacter: React.FC<NavitarCharacterProps> = ({
                   color: typeColors[character.type],
                   px: 1,
                   py: 0.5,
-                  borderRadius: 1
+                  borderRadius: 1,
                 }}
               >
                 {character.type}
@@ -131,7 +128,7 @@ const NavitarCharacter: React.FC<NavitarCharacterProps> = ({
                   color: rarityColors[character.rarity],
                   px: 1,
                   py: 0.5,
-                  borderRadius: 1
+                  borderRadius: 1,
                 }}
               >
                 {character.rarity}
@@ -145,18 +142,10 @@ const NavitarCharacter: React.FC<NavitarCharacterProps> = ({
             Stats
           </Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
-            <Typography variant="body2">
-              Strength: {character.stats.strength}
-            </Typography>
-            <Typography variant="body2">
-              Defense: {character.stats.defense}
-            </Typography>
-            <Typography variant="body2">
-              Speed: {character.stats.speed}
-            </Typography>
-            <Typography variant="body2">
-              Stamina: {character.stats.stamina}
-            </Typography>
+            <Typography variant="body2">Strength: {character.stats.strength}</Typography>
+            <Typography variant="body2">Defense: {character.stats.defense}</Typography>
+            <Typography variant="body2">Speed: {character.stats.speed}</Typography>
+            <Typography variant="body2">Stamina: {character.stats.stamina}</Typography>
           </Box>
         </Box>
 
@@ -173,7 +162,7 @@ const NavitarCharacter: React.FC<NavitarCharacterProps> = ({
                   borderRadius: 1,
                   bgcolor: 'background.paper',
                   border: '1px solid',
-                  borderColor: 'divider'
+                  borderColor: 'divider',
                 }}
               >
                 <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
@@ -191,4 +180,4 @@ const NavitarCharacter: React.FC<NavitarCharacterProps> = ({
   );
 };
 
-export default NavitarCharacter; 
+export default NavitarCharacter;

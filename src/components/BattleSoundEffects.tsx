@@ -7,10 +7,10 @@ interface BattleSoundEffectsProps {
   isActive: boolean;
 }
 
-const BattleSoundEffects: React.FC<BattleSoundEffectsProps> = ({ 
-  effects, 
-  comboMeter, 
-  isActive 
+const BattleSoundEffects: React.FC<BattleSoundEffectsProps> = ({
+  effects,
+  comboMeter,
+  isActive,
 }) => {
   const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
 
@@ -26,7 +26,7 @@ const BattleSoundEffects: React.FC<BattleSoundEffectsProps> = ({
       mist: '/sounds/mist.mp3',
       sunlight: '/sounds/sunlight.mp3',
       combo: '/sounds/combo.mp3',
-      special: '/sounds/special.mp3'
+      special: '/sounds/special.mp3',
     };
 
     Object.entries(soundEffects).forEach(([key, src]) => {
@@ -84,4 +84,4 @@ const BattleSoundEffects: React.FC<BattleSoundEffectsProps> = ({
   return null; // This component doesn't render anything
 };
 
-export default BattleSoundEffects; 
+export default BattleSoundEffects;

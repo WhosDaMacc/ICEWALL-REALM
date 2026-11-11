@@ -33,7 +33,9 @@ const BattleAnimation: React.FC<BattleAnimationProps> = ({
     marker.appendChild(effect);
 
     scene.appendChild(marker);
-    scene.appendChild(document.createElement('a-entity').setAttribute('camera', ''));
+    const camera = document.createElement('a-entity');
+    camera.setAttribute('camera', '');
+    scene.appendChild(camera);
 
     sceneRef.current.appendChild(scene);
 
@@ -51,7 +53,7 @@ const BattleAnimation: React.FC<BattleAnimationProps> = ({
 
   const createAbilityEffect = (ability: string, powerLevel: number) => {
     const container = document.createElement('a-entity');
-    
+
     switch (ability.toLowerCase()) {
       case "nature's embrace":
         return createHealingEffect(container, powerLevel);
@@ -165,4 +167,4 @@ const BattleAnimation: React.FC<BattleAnimationProps> = ({
   return <Box ref={sceneRef} sx={{ width: '100%', height: '100%' }} />;
 };
 
-export default BattleAnimation; 
+export default BattleAnimation;

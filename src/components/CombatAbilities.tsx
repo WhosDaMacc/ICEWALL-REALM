@@ -54,17 +54,12 @@ const CombatAbilities: React.FC = () => {
         Combat Abilities
       </Typography>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={draftAbilities}
-        sx={{ mb: 3 }}
-      >
+      <Button variant="contained" color="primary" onClick={draftAbilities} sx={{ mb: 3 }}>
         Draft New Abilities
       </Button>
 
       <Grid container spacing={3}>
-        {activeAbilities.map((ability) => (
+        {activeAbilities.map(ability => (
           <Grid item xs={12} sm={6} md={4} key={ability.id}>
             <Card
               sx={{
@@ -119,12 +114,7 @@ const CombatAbilities: React.FC = () => {
                       Random Effects:
                     </Typography>
                     {ability.randomizedTraits.map((trait, index) => (
-                      <Typography
-                        key={index}
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ ml: 2 }}
-                      >
+                      <Typography key={index} variant="body2" color="text.secondary" sx={{ ml: 2 }}>
                         {trait.chance}% chance: {trait.effect}
                       </Typography>
                     ))}
@@ -136,23 +126,15 @@ const CombatAbilities: React.FC = () => {
         ))}
       </Grid>
 
-      <Dialog
-        open={showAbilityDialog}
-        onClose={() => setShowAbilityDialog(false)}
-      >
+      <Dialog open={showAbilityDialog} onClose={() => setShowAbilityDialog(false)}>
         <DialogTitle>Use Ability</DialogTitle>
         <DialogContent>
-          <Typography>
-            Select a target for your ability:
-          </Typography>
+          <Typography>Select a target for your ability:</Typography>
           {/* Add target selection UI here */}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowAbilityDialog(false)}>Cancel</Button>
-          <Button
-            onClick={() => handleUseAbility('target-address')}
-            variant="contained"
-          >
+          <Button onClick={() => handleUseAbility('target-address')} variant="contained">
             Use Ability
           </Button>
         </DialogActions>
@@ -161,4 +143,4 @@ const CombatAbilities: React.FC = () => {
   );
 };
 
-export default CombatAbilities; 
+export default CombatAbilities;

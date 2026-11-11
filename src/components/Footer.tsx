@@ -39,18 +39,10 @@ const Footer: React.FC = () => {
           >
             GitHub
           </Link>
-          <Link
-            href="#"
-            color="inherit"
-            underline="hover"
-          >
+          <Link href="#" color="inherit" underline="hover">
             Terms
           </Link>
-          <Link
-            href="#"
-            color="inherit"
-            underline="hover"
-          >
+          <Link href="#" color="inherit" underline="hover">
             Privacy
           </Link>
         </Box>
@@ -59,4 +51,4 @@ const Footer: React.FC = () => {
   );
 };
 
-export default Footer; 
+export default Footer;

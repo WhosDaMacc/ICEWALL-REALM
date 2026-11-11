@@ -1,24 +1,10 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Grid,
-  Paper,
-  Typography,
-  Button,
-  CircularProgress,
-  Divider,
-} from '@mui/material';
+import { Box, Grid, Paper, Typography, Button, CircularProgress, Divider } from '@mui/material';
 import { useCombat } from '../contexts/CombatContext';
 import CombatAbilities from './CombatAbilities';
 
 const BattleInterface: React.FC = () => {
-  const {
-    currentBattle,
-    startBattle,
-    endBattle,
-    useAbility,
-    activeAbilities,
-  } = useCombat();
+  const { currentBattle, startBattle, endBattle, useAbility, activeAbilities } = useCombat();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleStartBattle = async () => {
@@ -111,4 +97,4 @@ const BattleInterface: React.FC = () => {
   );
 };
 
-export default BattleInterface; 
+export default BattleInterface;

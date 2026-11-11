@@ -4,7 +4,8 @@ import { styled } from '@mui/material/styles';
 
 interface Move {
   name: string;
-  type: 'ice' | 'fire' | 'nature' | 'shadow' | 'light';
+  type:
+    'ice' | 'fire' | 'nature' | 'shadow' | 'light' | 'quantum' | 'electric' | 'spiritual' | 'water';
   damage: number;
   energyGain?: number;
   energyCost?: number;
@@ -30,17 +31,31 @@ const MoveCard = styled(Paper)(({ theme }) => ({
   '&:hover': {
     transform: 'translateY(-2px)',
     boxShadow: theme.shadows[4],
-  }
+  },
 }));
 
 const getTypeColor = (type: string) => {
   switch (type) {
-    case 'ice': return '#81D4FA';
-    case 'fire': return '#FF5722';
-    case 'nature': return '#4CAF50';
-    case 'shadow': return '#9C27B0';
-    case 'light': return '#FFC107';
-    default: return '#2196F3';
+    case 'ice':
+      return '#81D4FA';
+    case 'fire':
+      return '#FF5722';
+    case 'nature':
+      return '#4CAF50';
+    case 'shadow':
+      return '#9C27B0';
+    case 'light':
+      return '#FFC107';
+    case 'quantum':
+      return '#B388FF';
+    case 'electric':
+      return '#FFEA00';
+    case 'spiritual':
+      return '#80DEEA';
+    case 'water':
+      return '#2196F3';
+    default:
+      return '#2196F3';
   }
 };
 
@@ -48,7 +63,7 @@ export const BattleMoves: React.FC<BattleMovesProps> = ({
   moves,
   onMoveSelect,
   currentEnergy,
-  isPlayerTurn
+  isPlayerTurn,
 }) => {
   return (
     <Box sx={{ p: 2 }}>
@@ -65,7 +80,9 @@ export const BattleMoves: React.FC<BattleMovesProps> = ({
             borderLeft: `4px solid ${getTypeColor(move.type)}`,
           }}
         >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}
+          >
             <Typography variant="subtitle1" sx={{ color: getTypeColor(move.type) }}>
               {move.name}
             </Typography>
@@ -77,15 +94,11 @@ export const BattleMoves: React.FC<BattleMovesProps> = ({
             {move.description}
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="body2">
-              Damage: {move.damage}
-            </Typography>
-            <Typography variant="body2">
-              Cooldown: {move.cooldown}s
-            </Typography>
+            <Typography variant="body2">Damage: {move.damage}</Typography>
+            <Typography variant="body2">Cooldown: {move.cooldown}s</Typography>
           </Box>
         </MoveCard>
       ))}
     </Box>
   );
-}; 
+};

@@ -54,7 +54,7 @@ const EnhancedBattle: React.FC = () => {
 
     // Calculate combo effects
     const comboMultiplier = calculateComboMultiplier(battleState.lastAction, target.type);
-    
+
     // Create AR scene with enhanced effects
     createEnhancedARScene(battleState.activeNavitar!, target, comboMultiplier);
   };
@@ -117,11 +117,16 @@ const EnhancedBattle: React.FC = () => {
 
   const getBattleEnvironment = (type: string): string => {
     switch (type) {
-      case 'healer': return 'forest';
-      case 'attacker': return 'volcano';
-      case 'defender': return 'mountain';
-      case 'support': return 'starry';
-      default: return 'default';
+      case 'healer':
+        return 'forest';
+      case 'attacker':
+        return 'volcano';
+      case 'defender':
+        return 'mountain';
+      case 'support':
+        return 'starry';
+      default:
+        return 'default';
     }
   };
 
@@ -170,8 +175,11 @@ const EnhancedBattle: React.FC = () => {
 
   return (
     <Box sx={{ position: 'relative', height: '100vh' }}>
-      <div ref={sceneRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} />
-      
+      <div
+        ref={sceneRef}
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+      />
+
       <Box sx={{ position: 'absolute', bottom: 20, width: '100%', px: 2 }}>
         <Paper sx={{ p: 2, backgroundColor: 'rgba(255, 255, 255, 0.9)' }}>
           <Grid container spacing={2}>
@@ -187,7 +195,7 @@ const EnhancedBattle: React.FC = () => {
                 />
               )}
             </Grid>
-            
+
             {battleState.activeNavitar && (
               <Grid item xs={12}>
                 <Typography>
@@ -222,4 +230,4 @@ const EnhancedBattle: React.FC = () => {
   );
 };
 
-export default EnhancedBattle; 
+export default EnhancedBattle;

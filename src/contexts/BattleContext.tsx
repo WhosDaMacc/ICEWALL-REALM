@@ -86,10 +86,11 @@ export const BattleProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
     // Apply active effects
     const attackerEffects = battleState.effects.filter(
-      e => (e.target === 'player' && attacker === battleState.playerTeam[0]) ||
-           (e.target === 'opponent' && attacker === battleState.opponentTeam[0])
+      e =>
+        (e.target === 'player' && attacker === battleState.playerTeam[0]) ||
+        (e.target === 'opponent' && attacker === battleState.opponentTeam[0])
     );
-    
+
     attackerEffects.forEach(effect => {
       if (effect.modifiers?.damage) {
         damage *= effect.modifiers.damage;
@@ -112,15 +113,16 @@ export const BattleProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   };
 
   const executeMove = (moveName: string, target: Navitar) => {
-    const attacker = battleState.currentTurn === 'player' 
-      ? battleState.playerTeam[0] 
-      : battleState.opponentTeam[0];
+    const attacker =
+      battleState.currentTurn === 'player'
+        ? battleState.playerTeam[0]
+        : battleState.opponentTeam[0];
 
     const move = attacker.moves.find(m => m.name === moveName);
     if (!move) return;
 
     const damage = calculateDamage(move, attacker, target);
-    
+
     setBattleState(prev => {
       const updatedTarget = {
         ...target,
@@ -135,7 +137,7 @@ export const BattleProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         turnCount: prev.turnCount + 1,
         lastMove: { attacker, defender: target, move },
         playerTeam: prev.currentTurn === 'opponent' ? [updatedTarget] : prev.playerTeam,
-        opponentTeam: prev.currentTurn === 'player' ? [updatedTarget] : prev.opponentTeam
+        opponentTeam: prev.currentTurn === 'player' ? [updatedTarget] : prev.opponentTeam,
       };
 
       return updatedState;
@@ -188,18 +190,20 @@ export const BattleProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   };
 
   return (
-    <BattleContext.Provider value={{
-      battleState,
-      startBattle,
-      endBattle,
-      executeMove,
-      addEffect,
-      removeEffect,
-      updateComboMeter,
-      storeSpecialMove,
-      calculateDamage,
-      applyEffects,
-    }}>
+    <BattleContext.Provider
+      value={{
+        battleState,
+        startBattle,
+        endBattle,
+        executeMove,
+        addEffect,
+        removeEffect,
+        updateComboMeter,
+        storeSpecialMove,
+        calculateDamage,
+        applyEffects,
+      }}
+    >
       {children}
     </BattleContext.Provider>
   );
@@ -211,4 +215,4 @@ export const useBattle = () => {
     throw new Error('useBattle must be used within a BattleProvider');
   }
   return context;
-}; 
+};

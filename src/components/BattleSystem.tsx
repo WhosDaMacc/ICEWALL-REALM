@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useBattle } from '../contexts/BattleContext';
+import { useBattle, BattleEffect } from '../contexts/BattleContext';
 import { useNavitar } from '../contexts/NavitarContext';
 import { useRealm } from '../contexts/RealmContext';
 import { Grid, Paper, Typography, Button, Box, LinearProgress, Chip } from '@mui/material';
@@ -23,7 +23,8 @@ const StatusChip = styled(Chip)(({ theme }) => ({
 }));
 
 const BattleSystem: React.FC = () => {
-  const { battleState, startBattle, endBattle, executeMove, addEffect, updateComboMeter } = useBattle();
+  const { battleState, startBattle, endBattle, executeMove, addEffect, updateComboMeter } =
+    useBattle();
   const { selectedNavitar, navitars } = useNavitar();
   const { activePortal } = useRealm();
   const [selectedMove, setSelectedMove] = useState<string | null>(null);
@@ -43,37 +44,44 @@ const BattleSystem: React.FC = () => {
 
   const getStatusColor = (type: string) => {
     switch (type) {
-      case 'burn': return 'error';
-      case 'freeze': return 'info';
-      case 'poison': return 'secondary';
-      case 'boost': return 'success';
-      default: return 'default';
+      case 'burn':
+        return 'error';
+      case 'freeze':
+        return 'info';
+      case 'poison':
+        return 'secondary';
+      case 'boost':
+        return 'success';
+      default:
+        return 'default';
     }
   };
 
   const handleMoveExecute = () => {
     if (selectedMove && battleState.isActive) {
-      const target = battleState.currentTurn === 'player' 
-        ? battleState.opponentTeam[0]
-        : battleState.playerTeam[0];
-      
+      const target =
+        battleState.currentTurn === 'player'
+          ? battleState.opponentTeam[0]
+          : battleState.playerTeam[0];
+
       executeMove(selectedMove, target);
-      
+
       const effectType = Math.random() > 0.5 ? 'status' : 'environmental';
       const effect: BattleEffect = {
         type: effectType as 'status' | 'environmental',
-        name: effectType === 'status' ? 
-          ['burn', 'freeze', 'poison', 'boost'][Math.floor(Math.random() * 4)] :
-          ['storm', 'earthquake', 'mist', 'sunlight'][Math.floor(Math.random() * 4)],
+        name:
+          effectType === 'status'
+            ? ['burn', 'freeze', 'poison', 'boost'][Math.floor(Math.random() * 4)]
+            : ['storm', 'earthquake', 'mist', 'sunlight'][Math.floor(Math.random() * 4)],
         duration: Math.floor(Math.random() * 3) + 1,
         intensity: Math.floor(Math.random() * 5) + 1,
         target: battleState.currentTurn === 'player' ? 'opponent' : 'player',
         modifiers: {
           damage: effectType === 'status' ? 0.8 : 1.2,
           defense: effectType === 'status' ? 1.2 : 0.8,
-        }
+        },
       };
-      
+
       addEffect(effect);
       updateComboMeter(10);
       setSelectedMove(null);
@@ -105,17 +113,17 @@ const BattleSystem: React.FC = () => {
             <Typography variant="h6">{battleState.playerTeam[0].name}</Typography>
             <Box sx={{ width: '100%', mb: 1 }}>
               <Typography>Health</Typography>
-              <LinearProgress 
-                variant="determinate" 
-                value={(battleState.playerTeam[0].health / 100) * 100} 
+              <LinearProgress
+                variant="determinate"
+                value={(battleState.playerTeam[0].health / 100) * 100}
                 color="primary"
               />
             </Box>
             <Box sx={{ width: '100%', mb: 1 }}>
               <Typography>Energy</Typography>
-              <LinearProgress 
-                variant="determinate" 
-                value={(battleState.playerTeam[0].energy / 100) * 100} 
+              <LinearProgress
+                variant="determinate"
+                value={(battleState.playerTeam[0].energy / 100) * 100}
                 color="secondary"
               />
             </Box>
@@ -140,17 +148,17 @@ const BattleSystem: React.FC = () => {
             <Typography variant="h6">{battleState.opponentTeam[0].name}</Typography>
             <Box sx={{ width: '100%', mb: 1 }}>
               <Typography>Health</Typography>
-              <LinearProgress 
-                variant="determinate" 
-                value={(battleState.opponentTeam[0].health / 100) * 100} 
+              <LinearProgress
+                variant="determinate"
+                value={(battleState.opponentTeam[0].health / 100) * 100}
                 color="primary"
               />
             </Box>
             <Box sx={{ width: '100%', mb: 1 }}>
               <Typography>Energy</Typography>
-              <LinearProgress 
-                variant="determinate" 
-                value={(battleState.opponentTeam[0].energy / 100) * 100} 
+              <LinearProgress
+                variant="determinate"
+                value={(battleState.opponentTeam[0].energy / 100) * 100}
                 color="secondary"
               />
             </Box>
@@ -171,16 +179,13 @@ const BattleSystem: React.FC = () => {
 
         {/* Battle Effects */}
         <Grid xs={12}>
-          <BattleEffects 
-            effects={battleState.effects}
-            comboMeter={battleState.comboMeter}
-          />
+          <BattleEffects effects={battleState.effects} comboMeter={battleState.comboMeter} />
         </Grid>
 
         {/* Battle Controls */}
         <Grid xs={12}>
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
-            {battleState.playerTeam[0].moves.map((move) => (
+            {battleState.playerTeam[0].moves.map(move => (
               <Button
                 key={move.name}
                 variant={selectedMove === move.name ? 'contained' : 'outlined'}
@@ -205,11 +210,7 @@ const BattleSystem: React.FC = () => {
         <Grid xs={12}>
           <Box sx={{ width: '100%', mt: 2 }}>
             <Typography>Combo Meter</Typography>
-            <LinearProgress 
-              variant="determinate" 
-              value={battleState.comboMeter} 
-              color="success"
-            />
+            <LinearProgress variant="determinate" value={battleState.comboMeter} color="success" />
           </Box>
         </Grid>
 
@@ -221,7 +222,8 @@ const BattleSystem: React.FC = () => {
             .map((effect, index) => (
               <Typography key={index}>
                 {effect.name} - {effect.duration} turns remaining
-                {effect.modifiers && ` (Damage: ${effect.modifiers.damage}x, Defense: ${effect.modifiers.defense}x)`}
+                {effect.modifiers &&
+                  ` (Damage: ${effect.modifiers.damage}x, Defense: ${effect.modifiers.defense}x)`}
               </Typography>
             ))}
         </Grid>
@@ -230,4 +232,4 @@ const BattleSystem: React.FC = () => {
   );
 };
 
-export default BattleSystem; 
+export default BattleSystem;

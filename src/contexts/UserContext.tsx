@@ -43,14 +43,17 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setError(null);
 
       const userProfile = await userManagement.getUserProfile(account);
+      // The on-chain struct calls the status field `status` (not
+      // `accountStatus`), and ethers v6 returns the uint256/enum fields as
+      // bigint — convert them to the numbers the app profile uses.
       setProfile({
         email: userProfile.email,
         username: userProfile.username,
         walletAddress: userProfile.walletAddress,
-        accountStatus: userProfile.accountStatus,
-        verificationStatus: userProfile.verificationStatus,
-        lastLogin: userProfile.lastLogin,
-        reputation: userProfile.reputation,
+        accountStatus: Number(userProfile.status),
+        verificationStatus: Number(userProfile.verificationStatus),
+        lastLogin: Number(userProfile.lastLogin),
+        reputation: Number(userProfile.reputation),
       });
     } catch (err) {
       setError('Failed to load user profile');
@@ -67,15 +70,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       setError(null);
 
-      // Update profile on blockchain
-      if (updates.email || updates.username) {
-        await userManagement.updateProfile(
-          updates.email || profile?.email || '',
-          updates.username || profile?.username || ''
-        );
-      }
-
-      await refreshProfile();
+      // The UserManagement contract has no update function — email/username
+      // are set once at registration (createUserProfile) — so edits apply
+      // locally only, and no chain refresh is done here (refreshing would
+      // reload the unchanged on-chain values and undo the edit). The
+      // contract needs an update path before edits can persist on-chain.
+      setProfile(prev => (prev ? { ...prev, ...updates } : prev));
     } catch (err) {
       setError('Failed to update profile');
       console.error('Error updating profile:', err);
@@ -105,4 +105,4 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
     </UserContext.Provider>
   );
-}; 
+};

@@ -47,7 +47,7 @@ const Home: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
@@ -82,7 +82,7 @@ const Home: React.FC = () => {
       </Box>
 
       <Grid container spacing={3}>
-        {realms.map((realm) => (
+        {realms.map(realm => (
           <Grid item xs={12} sm={6} md={4} key={realm.id}>
             <Card
               sx={{
@@ -106,10 +106,7 @@ const Home: React.FC = () => {
                 <Typography variant="body2" color="textSecondary">
                   Events: {realm.eventIds.length}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  color={realm.active ? 'success.main' : 'error.main'}
-                >
+                <Typography variant="body2" color={realm.active ? 'success.main' : 'error.main'}>
                   {realm.active ? 'Active' : 'Inactive'}
                 </Typography>
               </CardContent>
@@ -179,4 +176,4 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home; 
+export default Home;

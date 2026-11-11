@@ -50,17 +50,16 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const updateBusinessNavitar = useCallback((businessId: string, navitar: Business['navitar']) => {
     setBusinesses(prev =>
-      prev.map(business =>
-        business.id === businessId
-          ? { ...business, navitar }
-          : business
-      )
+      prev.map(business => (business.id === businessId ? { ...business, navitar } : business))
     );
   }, []);
 
-  const getBusinessById = useCallback((id: string) => {
-    return businesses.find(business => business.id === id);
-  }, [businesses]);
+  const getBusinessById = useCallback(
+    (id: string) => {
+      return businesses.find(business => business.id === id);
+    },
+    [businesses]
+  );
 
   return (
     <BusinessContext.Provider
@@ -74,4 +73,4 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       {children}
     </BusinessContext.Provider>
   );
-}; 
+};

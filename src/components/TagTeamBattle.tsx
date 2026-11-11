@@ -39,7 +39,7 @@ const TagTeamContainer = styled(Box)(({ theme }) => ({
 
 const calculateCombinedDamage = (move1: Move, move2: Move, comboMeter: number): number => {
   const baseDamage = (move1.damage + move2.damage) * 0.8; // 80% of combined damage
-  const comboBonus = 1 + (comboMeter / 100); // Up to 2x damage at full combo
+  const comboBonus = 1 + comboMeter / 100; // Up to 2x damage at full combo
   return Math.floor(baseDamage * comboBonus);
 };
 
@@ -70,7 +70,7 @@ const TagTeamBattle: React.FC<TagTeamBattleProps> = ({ team1, team2, onBattleCom
     setShowAnimation(true);
 
     const damage = calculateCombinedDamage(move1, move2, battleState.comboMeter);
-    
+
     setBattleState(prev => ({
       ...prev,
       targetNavitar1: {
@@ -105,17 +105,21 @@ const TagTeamBattle: React.FC<TagTeamBattleProps> = ({ team1, team2, onBattleCom
               <Typography variant="h6">Team 1</Typography>
               <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle1">{battleState.activeNavitar1.name}</Typography>
-                <LinearProgress 
-                  variant="determinate" 
-                  value={(battleState.activeNavitar1.health / battleState.activeNavitar1.maxHealth) * 100}
+                <LinearProgress
+                  variant="determinate"
+                  value={
+                    (battleState.activeNavitar1.health / battleState.activeNavitar1.maxHealth) * 100
+                  }
                   sx={{ height: 10, borderRadius: 5 }}
                 />
               </Box>
               <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle1">{battleState.activeNavitar2.name}</Typography>
-                <LinearProgress 
-                  variant="determinate" 
-                  value={(battleState.activeNavitar2.health / battleState.activeNavitar2.maxHealth) * 100}
+                <LinearProgress
+                  variant="determinate"
+                  value={
+                    (battleState.activeNavitar2.health / battleState.activeNavitar2.maxHealth) * 100
+                  }
                   sx={{ height: 10, borderRadius: 5 }}
                 />
               </Box>
@@ -130,17 +134,21 @@ const TagTeamBattle: React.FC<TagTeamBattleProps> = ({ team1, team2, onBattleCom
               <Typography variant="h6">Team 2</Typography>
               <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle1">{battleState.targetNavitar1.name}</Typography>
-                <LinearProgress 
-                  variant="determinate" 
-                  value={(battleState.targetNavitar1.health / battleState.targetNavitar1.maxHealth) * 100}
+                <LinearProgress
+                  variant="determinate"
+                  value={
+                    (battleState.targetNavitar1.health / battleState.targetNavitar1.maxHealth) * 100
+                  }
                   sx={{ height: 10, borderRadius: 5 }}
                 />
               </Box>
               <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle1">{battleState.targetNavitar2.name}</Typography>
-                <LinearProgress 
-                  variant="determinate" 
-                  value={(battleState.targetNavitar2.health / battleState.targetNavitar2.maxHealth) * 100}
+                <LinearProgress
+                  variant="determinate"
+                  value={
+                    (battleState.targetNavitar2.health / battleState.targetNavitar2.maxHealth) * 100
+                  }
                   sx={{ height: 10, borderRadius: 5 }}
                 />
               </Box>
@@ -153,17 +161,13 @@ const TagTeamBattle: React.FC<TagTeamBattleProps> = ({ team1, team2, onBattleCom
           <Card>
             <CardContent>
               <Typography variant="h6">Combo Meter</Typography>
-              <LinearProgress 
-                variant="determinate" 
+              <LinearProgress
+                variant="determinate"
                 value={battleState.comboMeter}
                 sx={{ height: 10, borderRadius: 5 }}
               />
               {battleState.specialMovesAvailable && (
-                <Chip 
-                  label="Special Moves Available!" 
-                  color="primary" 
-                  sx={{ mt: 1 }}
-                />
+                <Chip label="Special Moves Available!" color="primary" sx={{ mt: 1 }} />
               )}
             </CardContent>
           </Card>
@@ -176,8 +180,8 @@ const TagTeamBattle: React.FC<TagTeamBattleProps> = ({ team1, team2, onBattleCom
               <CardContent>
                 <Typography variant="h6">Combined Attacks</Typography>
                 <Grid container spacing={2}>
-                  {battleState.activeNavitar1.moves.map((move1) =>
-                    battleState.activeNavitar2.moves.map((move2) => (
+                  {battleState.activeNavitar1.moves.map(move1 =>
+                    battleState.activeNavitar2.moves.map(move2 => (
                       <Grid item xs={6} key={`${move1.name}-${move2.name}`}>
                         <Button
                           variant="contained"
@@ -198,12 +202,7 @@ const TagTeamBattle: React.FC<TagTeamBattleProps> = ({ team1, team2, onBattleCom
       </Grid>
 
       {/* Animation Dialog */}
-      <Dialog
-        open={showAnimation}
-        onClose={() => {}}
-        maxWidth="md"
-        fullWidth
-      >
+      <Dialog open={showAnimation} onClose={() => {}} maxWidth="md" fullWidth>
         <DialogContent>
           {currentMove && (
             <Box sx={{ textAlign: 'center' }}>
@@ -211,13 +210,14 @@ const TagTeamBattle: React.FC<TagTeamBattleProps> = ({ team1, team2, onBattleCom
                 {getCombinedMoveName(currentMove.move1, currentMove.move2)}
               </Typography>
               <Typography variant="body1">
-                Damage: {calculateCombinedDamage(currentMove.move1, currentMove.move2, battleState.comboMeter)}
+                Damage:{' '}
+                {calculateCombinedDamage(
+                  currentMove.move1,
+                  currentMove.move2,
+                  battleState.comboMeter
+                )}
               </Typography>
-              <Button 
-                variant="contained" 
-                onClick={handleAnimationComplete}
-                sx={{ mt: 2 }}
-              >
+              <Button variant="contained" onClick={handleAnimationComplete} sx={{ mt: 2 }}>
                 Continue
               </Button>
             </Box>
@@ -228,4 +228,4 @@ const TagTeamBattle: React.FC<TagTeamBattleProps> = ({ team1, team2, onBattleCom
   );
 };
 
-export default TagTeamBattle; 
+export default TagTeamBattle;

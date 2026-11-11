@@ -24,20 +24,20 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     const watchId = navigator.geolocation.watchPosition(
-      (position) => {
+      position => {
         setLocation({
           lat: position.coords.latitude,
-          lng: position.coords.longitude
+          lng: position.coords.longitude,
         });
         setError(null);
       },
-      (error) => {
+      error => {
         setError(`Error getting location: ${error.message}`);
       },
       {
         enableHighAccuracy: true,
         timeout: 5000,
-        maximumAge: 0
+        maximumAge: 0,
       }
     );
 
@@ -49,14 +49,10 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const value = {
     location,
     setLocation,
-    error
+    error,
   };
 
-  return (
-    <LocationContext.Provider value={value}>
-      {children}
-    </LocationContext.Provider>
-  );
+  return <LocationContext.Provider value={value}>{children}</LocationContext.Provider>;
 };
 
 export const useLocation = () => {
@@ -67,4 +63,4 @@ export const useLocation = () => {
   return context;
 };
 
-export type { MapLocation }; 
+export type { MapLocation };

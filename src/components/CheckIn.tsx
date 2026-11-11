@@ -13,7 +13,7 @@ interface CheckInProps {
 
 const CheckIn: React.FC<CheckInProps> = ({ location }) => {
   const { claimReward, availableRewards, refreshRewards } = useReward();
-  const { userProfile } = useUser();
+  const { profile: userProfile } = useUser();
   const [isCheckingIn, setIsCheckingIn] = useState(false);
   const [checkInSuccess, setCheckInSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +25,7 @@ const CheckIn: React.FC<CheckInProps> = ({ location }) => {
       setError(null);
 
       // Check if user has already checked in recently (within 24 hours)
-      if (lastCheckIn && (Date.now() - lastCheckIn.getTime()) < 24 * 60 * 60 * 1000) {
+      if (lastCheckIn && Date.now() - lastCheckIn.getTime() < 24 * 60 * 60 * 1000) {
         setError('You can only check in once every 24 hours');
         return;
       }
@@ -38,14 +38,15 @@ const CheckIn: React.FC<CheckInProps> = ({ location }) => {
       setCheckInSuccess(true);
 
       // Find and claim available rewards
-      const locationRewards = availableRewards.filter(reward => 
-        reward.location && 
-        calculateDistance(
-          location.latitude,
-          location.longitude,
-          reward.location.latitude,
-          reward.location.longitude
-        ) <= reward.location.radius
+      const locationRewards = availableRewards.filter(
+        reward =>
+          reward.location &&
+          calculateDistance(
+            location.latitude,
+            location.longitude,
+            reward.location.latitude,
+            reward.location.longitude
+          ) <= reward.location.radius
       );
 
       // Claim all eligible rewards
@@ -55,7 +56,6 @@ const CheckIn: React.FC<CheckInProps> = ({ location }) => {
 
       // Refresh available rewards
       refreshRewards();
-
     } catch (err) {
       setError('Failed to check in. Please try again.');
     } finally {
@@ -65,15 +65,15 @@ const CheckIn: React.FC<CheckInProps> = ({ location }) => {
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371e3; // Earth's radius in meters
-    const φ1 = lat1 * Math.PI/180;
-    const φ2 = lat2 * Math.PI/180;
-    const Δφ = (lat2-lat1) * Math.PI/180;
-    const Δλ = (lon2-lon1) * Math.PI/180;
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
   };
@@ -89,11 +89,7 @@ const CheckIn: React.FC<CheckInProps> = ({ location }) => {
   }, [checkInSuccess]);
 
   if (!userProfile) {
-    return (
-      <Alert severity="warning">
-        Please connect your wallet to check in.
-      </Alert>
-    );
+    return <Alert severity="warning">Please connect your wallet to check in.</Alert>;
   }
 
   return (
@@ -101,7 +97,7 @@ const CheckIn: React.FC<CheckInProps> = ({ location }) => {
       <Typography variant="h6" gutterBottom>
         Check In
       </Typography>
-      
+
       <Box sx={{ mb: 2 }}>
         <LocationOn color="primary" sx={{ fontSize: 40 }} />
         <Typography variant="body2" color="text.secondary">
@@ -144,4 +140,4 @@ const CheckIn: React.FC<CheckInProps> = ({ location }) => {
   );
 };
 
-export default CheckIn; 
+export default CheckIn;

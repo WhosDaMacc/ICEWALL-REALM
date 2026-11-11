@@ -39,7 +39,7 @@ const NavitarDisplay: React.FC = () => {
   useEffect(() => {
     // Check for AR support
     if (navigator.xr) {
-      navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
+      navigator.xr.isSessionSupported('immersive-ar').then(supported => {
         setIsARActive(supported);
       });
     }
@@ -133,7 +133,7 @@ const NavitarDisplay: React.FC = () => {
       </a-scene>
 
       <Box sx={{ position: 'fixed', bottom: 20, width: '100%', textAlign: 'center' }}>
-        {navitars.map((navitar) => (
+        {navitars.map(navitar => (
           <Button
             key={navitar.id}
             variant="contained"
@@ -148,4 +148,4 @@ const NavitarDisplay: React.FC = () => {
   );
 };
 
-export default NavitarDisplay; 
+export default NavitarDisplay;

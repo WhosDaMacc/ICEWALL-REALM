@@ -75,7 +75,7 @@ const TierProgression: React.FC = () => {
 
       <Paper sx={{ p: 3, mb: 3 }}>
         <Stepper activeStep={currentTierIndex} alternativeLabel>
-          {tiers.map((tier) => (
+          {tiers.map(tier => (
             <Step key={tier}>
               <StepLabel
                 icon={
@@ -189,7 +189,7 @@ const TierProgression: React.FC = () => {
             Available Realms
           </Typography>
           <Grid container spacing={2}>
-            {realms.map((realm) => (
+            {realms.map(realm => (
               <Grid item xs={12} sm={6} md={4} key={realm.id}>
                 <Card
                   sx={{
@@ -269,4 +269,4 @@ const TierProgression: React.FC = () => {
   );
 };
 
-export default TierProgression; 
+export default TierProgression;

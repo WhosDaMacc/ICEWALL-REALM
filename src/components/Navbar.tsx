@@ -1,11 +1,8 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { useNavitar } from '../contexts/NavitarContext';
 
 const Navbar: React.FC = () => {
-  const { selectedNavitar } = useNavitar();
-
   return (
     <AppBar position="static" color="transparent" elevation={1}>
       <Toolbar>
@@ -24,33 +21,20 @@ const Navbar: React.FC = () => {
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button
-            component={RouterLink}
-            to="/battle"
-            color="inherit"
-            disabled={!selectedNavitar}
-          >
+          {/* Battle used to be disabled until a navitar was selected in a
+              different navitar model than the one the Battle page actually
+              uses, so the link could never enable. The Battle page renders
+              fine and now offers to create a Navitar when none exists. */}
+          <Button component={RouterLink} to="/battle" color="inherit">
             Battle
           </Button>
-          <Button
-            component={RouterLink}
-            to="/collection"
-            color="inherit"
-          >
+          <Button component={RouterLink} to="/collection" color="inherit">
             Collection
           </Button>
-          <Button
-            component={RouterLink}
-            to="/realm"
-            color="inherit"
-          >
+          <Button component={RouterLink} to="/realm" color="inherit">
             Realm Map
           </Button>
-          <Button
-            component={RouterLink}
-            to="/profile"
-            color="inherit"
-          >
+          <Button component={RouterLink} to="/profile" color="inherit">
             Profile
           </Button>
         </Box>
@@ -59,4 +43,4 @@ const Navbar: React.FC = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;

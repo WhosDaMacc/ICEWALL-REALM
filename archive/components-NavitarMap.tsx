@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Box, 
-  IconButton, 
-  Typography, 
-  Paper, 
-  Chip, 
+import {
+  Box,
+  IconButton,
+  Typography,
+  Paper,
+  Chip,
   Badge,
   SpeedDial,
   SpeedDialAction,
@@ -18,7 +18,7 @@ import {
   ListItem,
   Divider,
   Button,
-  Fab
+  Fab,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { GoogleMap, LoadScript, Marker, InfoWindow, Circle } from '@react-google-maps/api';
@@ -67,7 +67,7 @@ interface RealmPortal {
 
 const mapStyles: MapStyles = {
   width: '100%',
-  height: '100vh'
+  height: '100vh',
 };
 
 const MapOverlay = styled(Box)(({ theme }) => ({
@@ -82,29 +82,29 @@ const MapOverlay = styled(Box)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  zIndex: 1
+  zIndex: 1,
 }));
 
 const NavigationMenu = styled(Box)(({ theme }) => ({
   position: 'absolute',
   top: theme.spacing(2),
   left: theme.spacing(2),
-  zIndex: 1
+  zIndex: 1,
 }));
 
 const ARButton = styled(Fab)(({ theme }) => ({
   position: 'absolute',
   bottom: theme.spacing(12),
   right: theme.spacing(2),
-  zIndex: 1
+  zIndex: 1,
 }));
 
 const MarkerInfo = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
   maxWidth: 300,
   '& .MuiTypography-root': {
-    marginBottom: theme.spacing(1)
-  }
+    marginBottom: theme.spacing(1),
+  },
 }));
 
 const NavitarMap: React.FC = () => {
@@ -126,30 +126,30 @@ const NavitarMap: React.FC = () => {
       {
         featureType: 'landscape',
         elementType: 'all',
-        stylers: [{ color: '#e4e4e4' }]
+        stylers: [{ color: '#e4e4e4' }],
       },
       {
         featureType: 'water',
         elementType: 'all',
-        stylers: [{ color: '#a3ccff' }]
+        stylers: [{ color: '#a3ccff' }],
       },
       {
         featureType: 'poi',
         elementType: 'all',
-        stylers: [{ visibility: 'simplified' }]
+        stylers: [{ visibility: 'simplified' }],
       },
       {
         featureType: 'road',
         elementType: 'all',
-        stylers: [{ color: '#ffffff' }]
-      }
+        stylers: [{ color: '#ffffff' }],
+      },
     ],
     disableDefaultUI: true,
     zoomControl: true,
     mapTypeControl: false,
     streetViewControl: false,
     rotateControl: false,
-    fullscreenControl: false
+    fullscreenControl: false,
   };
 
   // Menu options for different categories
@@ -157,28 +157,28 @@ const NavitarMap: React.FC = () => {
     {
       title: 'Battle',
       icon: <ViewInArIcon />,
-      subItems: ['Arena Battles', 'Training Ground', 'Tournament']
+      subItems: ['Arena Battles', 'Training Ground', 'Tournament'],
     },
     {
       title: 'Social',
       icon: <PeopleIcon />,
-      subItems: ['Friends', 'Teams', 'Chat']
+      subItems: ['Friends', 'Teams', 'Chat'],
     },
     {
       title: 'Marketplace',
       icon: <StorefrontIcon />,
-      subItems: ['Shop', 'Trade', 'Auction House']
+      subItems: ['Shop', 'Trade', 'Auction House'],
     },
     {
       title: 'Inventory',
       icon: <InventoryIcon />,
-      subItems: ['Navitars', 'Items', 'Collections']
+      subItems: ['Navitars', 'Items', 'Collections'],
     },
     {
       title: 'Leaderboards',
       icon: <LeaderboardIcon />,
-      subItems: ['Global Ranking', 'Local Ranking', 'Team Ranking']
-    }
+      subItems: ['Global Ranking', 'Local Ranking', 'Team Ranking'],
+    },
   ];
 
   useEffect(() => {
@@ -200,14 +200,14 @@ const NavitarMap: React.FC = () => {
           type: 'business',
           title: 'Ice Cream Shop',
           description: 'Special Navitar battles available!',
-          reward: 100
+          reward: 100,
         },
         {
           id: '2',
           position: { lat: center.lat - 0.001, lng: center.lng - 0.001 },
           type: 'hotspot',
           title: 'Downtown Plaza',
-          description: 'Popular gathering spot for Navitar trainers'
+          description: 'Popular gathering spot for Navitar trainers',
         },
         {
           id: '3',
@@ -215,8 +215,8 @@ const NavitarMap: React.FC = () => {
           type: 'wild_navitar',
           title: 'Wild Frostbite Dragon',
           rarity: 'rare',
-          description: 'A rare ice dragon appeared!'
-        }
+          description: 'A rare ice dragon appeared!',
+        },
       ];
 
       setMarkers(mockMarkers);
@@ -237,7 +237,7 @@ const NavitarMap: React.FC = () => {
         type: 'ice',
         radius: 100,
         activeUsers: 15,
-        powerLevel: 8
+        powerLevel: 8,
       },
       {
         id: '2',
@@ -246,8 +246,8 @@ const NavitarMap: React.FC = () => {
         type: 'ice',
         radius: 150,
         activeUsers: 23,
-        powerLevel: 12
-      }
+        powerLevel: 12,
+      },
     ];
     setRealmPortals(mockPortals);
   }, [center]);
@@ -296,11 +296,16 @@ const NavitarMap: React.FC = () => {
 
   const getPortalColor = (type: string) => {
     switch (type) {
-      case 'ice': return '#81D4FA';
-      case 'fire': return '#FF5722';
-      case 'nature': return '#4CAF50';
-      case 'cosmic': return '#9C27B0';
-      default: return '#2196F3';
+      case 'ice':
+        return '#81D4FA';
+      case 'fire':
+        return '#FF5722';
+      case 'nature':
+        return '#4CAF50';
+      case 'cosmic':
+        return '#9C27B0';
+      default:
+        return '#2196F3';
     }
   };
 
@@ -314,17 +319,19 @@ const NavitarMap: React.FC = () => {
           <Chip
             label={marker.rarity.toUpperCase()}
             color={
-              marker.rarity === 'legendary' ? 'error' :
-              marker.rarity === 'epic' ? 'secondary' :
-              marker.rarity === 'rare' ? 'primary' : 'default'
+              marker.rarity === 'legendary'
+                ? 'error'
+                : marker.rarity === 'epic'
+                  ? 'secondary'
+                  : marker.rarity === 'rare'
+                    ? 'primary'
+                    : 'default'
             }
             size="small"
             sx={{ mb: 1 }}
           />
         )}
-        <Typography variant="body2">
-          {marker.description}
-        </Typography>
+        <Typography variant="body2">{marker.description}</Typography>
         {marker.reward && (
           <Typography variant="body2" color="success.main">
             Reward: {marker.reward} points
@@ -343,12 +350,8 @@ const NavitarMap: React.FC = () => {
         label={`${portal.type.toUpperCase()} REALM`}
         sx={{ backgroundColor: getPortalColor(portal.type), color: 'white', mb: 1 }}
       />
-      <Typography variant="body2">
-        Active Users: {portal.activeUsers}
-      </Typography>
-      <Typography variant="body2">
-        Power Level: {portal.powerLevel}
-      </Typography>
+      <Typography variant="body2">Active Users: {portal.activeUsers}</Typography>
+      <Typography variant="body2">Power Level: {portal.powerLevel}</Typography>
       <Button
         variant="contained"
         color="primary"
@@ -364,30 +367,22 @@ const NavitarMap: React.FC = () => {
   return (
     <Box sx={{ position: 'relative', width: '100%', height: '100vh' }}>
       <NavigationMenu>
-        <IconButton
-          size="large"
-          onClick={handleDrawerToggle}
-          sx={{ backgroundColor: 'white' }}
-        >
+        <IconButton size="large" onClick={handleDrawerToggle} sx={{ backgroundColor: 'white' }}>
           <MenuIcon />
         </IconButton>
       </NavigationMenu>
 
-      <Drawer
-        anchor="left"
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-      >
+      <Drawer anchor="left" open={drawerOpen} onClose={handleDrawerToggle}>
         <Box sx={{ width: 280 }}>
           <List>
-            {menuCategories.map((category) => (
+            {menuCategories.map(category => (
               <React.Fragment key={category.title}>
                 <ListItem>
                   <ListItemIcon>{category.icon}</ListItemIcon>
                   <ListItemText primary={category.title} />
                 </ListItem>
                 <List component="div" disablePadding>
-                  {category.subItems.map((item) => (
+                  {category.subItems.map(item => (
                     <ListItem
                       key={item}
                       button
@@ -421,7 +416,7 @@ const NavitarMap: React.FC = () => {
               position={userLocation}
               icon={{
                 url: '/assets/markers/user.png',
-                scaledSize: new window.google.maps.Size(40, 40)
+                scaledSize: new window.google.maps.Size(40, 40),
               }}
             />
           )}
@@ -433,7 +428,7 @@ const NavitarMap: React.FC = () => {
               position={marker.position}
               icon={{
                 url: getMarkerIcon(marker.type, marker.rarity),
-                scaledSize: new window.google.maps.Size(40, 40)
+                scaledSize: new window.google.maps.Size(40, 40),
               }}
               onClick={() => handleMarkerClick(marker)}
             />
@@ -457,7 +452,7 @@ const NavitarMap: React.FC = () => {
                 position={portal.position}
                 icon={{
                   url: `/assets/markers/portal_${portal.type}.png`,
-                  scaledSize: new window.google.maps.Size(50, 50)
+                  scaledSize: new window.google.maps.Size(50, 50),
                 }}
                 onClick={() => setSelectedMarker(portal)}
               />
@@ -472,17 +467,13 @@ const NavitarMap: React.FC = () => {
             >
               {'type' in selectedMarker
                 ? renderPortalInfo(selectedMarker as RealmPortal)
-                : renderMarkerInfo(selectedMarker as MapMarker)
-              }
+                : renderMarkerInfo(selectedMarker as MapMarker)}
             </InfoWindow>
           )}
         </GoogleMap>
       </LoadScript>
 
-      <ARButton
-        color="primary"
-        onClick={handleEnterAR}
-      >
+      <ARButton color="primary" onClick={handleEnterAR}>
         <ViewInArIcon />
       </ARButton>
 
@@ -512,4 +503,4 @@ const NavitarMap: React.FC = () => {
   );
 };
 
-export default NavitarMap; 
+export default NavitarMap;
