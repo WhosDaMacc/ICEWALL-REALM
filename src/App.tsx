@@ -10,6 +10,7 @@ import { BusinessProvider } from './contexts/BusinessContext';
 import { RewardProvider } from './contexts/RewardContext';
 import { NavitarFightClubProvider } from './contexts/NavitarFightClub';
 import { VenueProvider } from './contexts/VenueContext';
+import { PresenceProvider } from './contexts/PresenceContext';
 
 // Pages
 import Home from './pages/Home';
@@ -27,6 +28,7 @@ import ARView from './pages/ARView';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
+import IcebreakerNotification from './components/IcebreakerNotification';
 
 // Create theme
 const theme = createTheme({
@@ -110,13 +112,19 @@ const App: React.FC = () => {
                       opponent when a challenge is accepted. */}
                     <VenueProvider>
                       <Router basename="/ICEWALL-REALM">
-                        <div className="app">
-                          <Navbar />
-                          <main className="main-content">
-                            <AppRoutes />
-                          </main>
-                          <Footer />
-                        </div>
+                        {/* PresenceProvider lives inside the Router (its
+                            icebreaker card navigates to the map) and inside
+                            VenueProvider (offers key off check-in state). */}
+                        <PresenceProvider>
+                          <div className="app">
+                            <Navbar />
+                            <main className="main-content">
+                              <AppRoutes />
+                            </main>
+                            <Footer />
+                            <IcebreakerNotification />
+                          </div>
+                        </PresenceProvider>
                       </Router>
                     </VenueProvider>
                   </NavitarFightClubProvider>

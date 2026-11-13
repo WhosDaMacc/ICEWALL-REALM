@@ -42,6 +42,18 @@ export interface IcebreakerAnswer {
   reply: string;
 }
 
+// Networking presence (Eddie, 2026-11-13): every person at a venue has
+// an availability status and a visibility scope — the same two settings
+// the player controls for themselves (see src/utils/presence.ts).
+// - networkingStatus: 'open' (happy to meet), 'battle' (here to battle,
+//   no new intros via icebreakers), 'quiet' (no new intros at all).
+// - visibility: who can see this person in Who's Here — 'venue'
+//   (everyone checked in here), 'friends' (their friends only),
+//   'business' (only people who tagged them as a business contact),
+//   'invisible' (nobody — they never appear in Who's Here).
+export type PersonNetworkingStatus = 'open' | 'battle' | 'quiet';
+export type PersonVisibility = 'venue' | 'friends' | 'business' | 'invisible';
+
 export interface VenuePerson {
   id: string;
   name: string;
@@ -65,6 +77,22 @@ export interface VenuePerson {
   // Closer framing for the 3D model on the stage (1 = default; the
   // phoenix's wide wingspan needs 1.5 to read at a good size).
   navitarModelZoom?: number;
+  // Networking presence: availability + who can see them (see the
+  // PersonNetworkingStatus / PersonVisibility types above).
+  networkingStatus: PersonNetworkingStatus;
+  visibility: PersonVisibility;
+  // Match contexts (Eddie, 2026-11-13): WHY this person is here.
+  // industry/businessName drive Business matches against the player's
+  // own business (exact category match in the demo); businessOpener is
+  // their scripted business-flavored intro line for the navitar card.
+  // interests drive Shared-interest matches. openToDating is their
+  // dating opt-in — a dating match exists only when the player has
+  // opted in too, and never for a quiet person.
+  industry?: string;
+  businessName?: string;
+  businessOpener?: string;
+  interests: string[];
+  openToDating?: boolean;
   // Scripted icebreaker — one exchange only, no AI, no chat app.
   icebreakerQuestion: string;
   icebreakerAnswers: IcebreakerAnswer[];
@@ -110,6 +138,13 @@ export const DEMO_VENUES: DemoVenue[] = [
         navitarLevel: 1,
         navitarSkills: ['Frost Nip', 'Snow Step'],
         navitarImage: `${process.env.PUBLIC_URL}/navitars/frostpup.webp`,
+        networkingStatus: 'open',
+        visibility: 'venue',
+        industry: 'Music & Nightlife',
+        businessName: 'Marquee Live Sessions',
+        businessOpener:
+          'Ask Maya how she books the bands for Marquee Live Sessions — you are both in Music & Nightlife.',
+        interests: ['Live music', 'Trivia'],
         icebreakerQuestion: 'First time here, or are you a regular?',
         icebreakerAnswers: [
           {
@@ -130,7 +165,7 @@ export const DEMO_VENUES: DemoVenue[] = [
       {
         id: 'person-darius',
         name: 'Darius',
-        vibe: 'Trivia-night champ, undefeated two weeks running',
+        vibe: 'Trivia-night champ, undefeated two weeks running — here on business, so only his business contacts can see him',
         navitarName: 'Ashwing',
         navitarElement: 'fire',
         navitarLevel: 2,
@@ -138,6 +173,13 @@ export const DEMO_VENUES: DemoVenue[] = [
         navitarImage: `${process.env.PUBLIC_URL}/navitars/ashwing.webp`,
         navitarModelUrl: `${process.env.PUBLIC_URL}/models/fire-phoenix.glb`,
         navitarModelZoom: 1.5,
+        networkingStatus: 'open',
+        visibility: 'business',
+        industry: 'Food & Drink',
+        businessName: 'Ember Wing Sauce Co.',
+        businessOpener:
+          'Ask Darius about Ember Wing Sauce Co. — his hot-sauce line just landed in three new bars. You are both in Food & Drink.',
+        interests: ['Trivia', 'Coffee'],
         icebreakerQuestion: 'Quick — best trivia category?',
         icebreakerAnswers: [
           {
@@ -163,6 +205,14 @@ export const DEMO_VENUES: DemoVenue[] = [
         navitarLevel: 1,
         navitarSkills: ['Salt Spray', 'Calm Current'],
         navitarImage: `${process.env.PUBLIC_URL}/navitars/tidecaller.webp`,
+        networkingStatus: 'open',
+        visibility: 'venue',
+        industry: 'Media & Content',
+        businessName: 'Priya Shoots',
+        businessOpener:
+          'Ask Priya about shooting golden hour for Priya Shoots — you are both in Media & Content.',
+        interests: ['Photography', 'Coffee'],
+        openToDating: true,
         icebreakerQuestion: 'Patio or inside?',
         icebreakerAnswers: [
           {
@@ -197,6 +247,13 @@ export const DEMO_VENUES: DemoVenue[] = [
         // No 2D art for the Griffin — the battle stage shows its 3D
         // model, and the map cards show the ice emoji instead.
         navitarModelUrl: `${process.env.PUBLIC_URL}/models/ice-griffin.glb`,
+        networkingStatus: 'battle',
+        visibility: 'venue',
+        industry: 'Art & Design',
+        businessName: 'Kai Draws Things',
+        businessOpener:
+          'Ask Kai about the winged-creature series he sells as Kai Draws Things — you are both in Art & Design.',
+        interests: ['Art', 'Coffee'],
         icebreakerQuestion: 'What brings you to the cold end of the bar?',
         icebreakerAnswers: [
           {
@@ -242,6 +299,13 @@ export const DEMO_VENUES: DemoVenue[] = [
         navitarLevel: 1,
         navitarSkills: ['Thorn Guard', 'Root Slam'],
         navitarImage: `${process.env.PUBLIC_URL}/navitars/stonehorn.webp`,
+        networkingStatus: 'open',
+        visibility: 'venue',
+        industry: 'Food & Drink',
+        businessName: "Marcus's Wing Reviews",
+        businessOpener:
+          'Ask Marcus which wing spot tops Marcus\u2019s Wing Reviews this month — you are both in Food & Drink.',
+        interests: ['Foodie', 'Gaming'],
         icebreakerQuestion: 'How hot is too hot?',
         icebreakerAnswers: [
           {
@@ -267,6 +331,17 @@ export const DEMO_VENUES: DemoVenue[] = [
         navitarLevel: 2,
         navitarSkills: ['Static Pounce', 'Spark Dash'],
         navitarImage: `${process.env.PUBLIC_URL}/navitars/voltkit.webp`,
+        networkingStatus: 'quiet',
+        visibility: 'venue',
+        industry: 'Retail & Fashion',
+        businessName: 'Lena\u2019s Vintage Rack',
+        businessOpener:
+          'Ask Lena what just came in at Lena\u2019s Vintage Rack — you are both in Retail & Fashion.',
+        interests: ['Fashion', 'Gaming'],
+        // Lena opted in to dating — but she is QUIET, so no dating
+        // chip or dating card may ever surface for her (the match
+        // helper enforces it; she is the demo's proof of the rule).
+        openToDating: true,
         icebreakerQuestion: 'Winner stays on the table?',
         icebreakerAnswers: [
           {
@@ -310,6 +385,14 @@ export const DEMO_VENUES: DemoVenue[] = [
         navitarLevel: 1,
         navitarSkills: ['Tidal Bite', 'Salt Surge'],
         navitarImage: `${process.env.PUBLIC_URL}/navitars/wavefang.webp`,
+        networkingStatus: 'open',
+        visibility: 'venue',
+        industry: 'Fitness & Outdoors',
+        businessName: 'Sam\u2019s Surf Lessons',
+        businessOpener:
+          'Ask Sam how Sam\u2019s Surf Lessons books out on sunset weekends — you are both in Fitness & Outdoors.',
+        interests: ['Surfing', 'Fitness'],
+        openToDating: true,
         icebreakerQuestion: 'Sunset session or sunrise?',
         icebreakerAnswers: [
           {
@@ -335,6 +418,13 @@ export const DEMO_VENUES: DemoVenue[] = [
         navitarLevel: 2,
         navitarSkills: ['Prism Gleam', 'Reef Glow'],
         navitarImage: `${process.env.PUBLIC_URL}/navitars/coralight.webp`,
+        networkingStatus: 'battle',
+        visibility: 'venue',
+        industry: 'Art & Design',
+        businessName: 'Jules Beach Glass',
+        businessOpener:
+          'Ask Jules where Jules Beach Glass sells best — you are both in Art & Design.',
+        interests: ['Photography', 'Art'],
         icebreakerQuestion: 'Best thing about the beach at night?',
         icebreakerAnswers: [
           {
@@ -379,6 +469,13 @@ export const DEMO_VENUES: DemoVenue[] = [
         navitarLevel: 1,
         navitarSkills: ['Vine Whip', 'Leaf Shield'],
         navitarImage: `${process.env.PUBLIC_URL}/navitars/leafpaw.webp`,
+        networkingStatus: 'open',
+        visibility: 'venue',
+        industry: 'Fitness & Outdoors',
+        businessName: 'Ana\u2019s Trail Crew',
+        businessOpener:
+          'Ask Ana how Ana\u2019s Trail Crew picks its Saturday routes — you are both in Fitness & Outdoors.',
+        interests: ['Hiking', 'Fitness'],
         icebreakerQuestion: 'Best trail for a sunset run?',
         icebreakerAnswers: [
           {
@@ -406,6 +503,13 @@ export const DEMO_VENUES: DemoVenue[] = [
         navitarLevel: 2,
         navitarSkills: ['Star Flare', 'Moon Guard'],
         navitarImage: `${process.env.PUBLIC_URL}/navitars/starborn.webp`,
+        networkingStatus: 'open',
+        visibility: 'venue',
+        industry: 'Tech & Startups',
+        businessName: 'Theo\u2019s Star Charts',
+        businessOpener:
+          'Ask Theo who uses Theo\u2019s Star Charts — you are both in Tech & Startups.',
+        interests: ['Startups', 'Photography'],
         icebreakerQuestion: 'Have you ever seen the Observatory show?',
         icebreakerAnswers: [
           {
@@ -419,6 +523,41 @@ export const DEMO_VENUES: DemoVenue[] = [
           {
             label: 'I am more into the view than the stars.',
             reply: 'The view IS the show. Stand right here at dusk and the whole city turns gold.',
+          },
+        ],
+      },
+      {
+        // Rosa is INVISIBLE on purpose: she demonstrates the
+        // 'invisible' visibility scope — she is in the park's data
+        // but never appears in Who's Here for anyone. Her icebreaker
+        // exists so the data is complete; the UI never offers it.
+        id: 'person-rosa',
+        name: 'Rosa',
+        vibe: 'Sketches the Observatory at dusk — keeps to herself',
+        navitarName: 'Shadowmaw',
+        navitarElement: 'shadow',
+        navitarLevel: 2,
+        navitarSkills: ['Umbral Step', 'Night Whisper'],
+        navitarImage: `${process.env.PUBLIC_URL}/navitars/shadowmaw.webp`,
+        networkingStatus: 'open',
+        visibility: 'invisible',
+        industry: 'Art & Design',
+        businessName: 'Rosa Sketches',
+        interests: ['Art', 'Photography'],
+        openToDating: true,
+        icebreakerQuestion: 'Come here often?',
+        icebreakerAnswers: [
+          {
+            label: 'Most evenings.',
+            reply: 'Then we have probably shared this view a dozen times without knowing.',
+          },
+          {
+            label: 'First time.',
+            reply: 'Welcome. The dusk show is the best one — no ticket needed.',
+          },
+          {
+            label: 'Just passing through.',
+            reply: 'Everyone says that the first time. The park has a way of keeping people.',
           },
         ],
       },

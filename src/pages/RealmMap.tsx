@@ -34,13 +34,16 @@ import {
 import { RealmProvider, useRealm, RealmPortal } from '../contexts/RealmContext';
 import { JOE_OPPONENT_ID, useNavitarFightClub } from '../contexts/NavitarFightClub';
 import { useVenue } from '../contexts/VenueContext';
+import { usePresence } from '../contexts/PresenceContext';
 import { DEMO_VENUES, DemoVenue, VenueKind, VenuePerson } from '../data/venues';
 import { WILD_NAVITARS, WildNavitar } from '../data/wild';
 import { JOE_INTRO } from '../data/joe';
 import { REFILL_STATIONS, RefillStation } from '../data/stations';
 import { POTIONS, PotionCounts, PotionId, getPotions, grantPotions } from '../utils/potions';
-import { recordMetFriend } from '../utils/friends';
+import { loadFriends, recordMetFriend } from '../utils/friends';
 import { personThreadId, seedPersonThread } from '../utils/threads';
+import { personVisibleToPlayer } from '../utils/presence';
+import { PersonStatusChip, VenueNetworkingStrip } from '../components/NetworkingStatus';
 import { elementColor, elementEmoji, resolveNavitarArt } from '../utils/navitarArt';
 import { NavitarArtImg } from '../components/NavitarArtImg';
 
@@ -582,6 +585,7 @@ const RealmMapInner: React.FC = () => {
   const { portals, activePortal, setActivePortal } = useRealm();
   const { userNavitar, points, addVenueOpponent, addWildOpponent } = useNavitarFightClub();
   const { checkedInVenueId, checkIn, checkOut, venueWins, setPendingChallenge } = useVenue();
+  const { businessContactIds, meetHandoff, clearMeetHandoff, getMatchReason } = usePresence();
   const navigate = useNavigate();
   const [you, setYou] = useState<[number, number] | null>(null);
   const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
@@ -650,6 +654,17 @@ const RealmMapInner: React.FC = () => {
   const selectedVenue = DEMO_VENUES.find(v => v.id === selectedVenueId) ?? null;
   const meetPerson: VenuePerson | null =
     selectedVenue?.people.find(p => p.id === meetPersonId) ?? null;
+  // Who's Here respects each person's visibility from the player's
+  // side (src/utils/presence.ts): invisible people never render,
+  // business-visibility people render only for their business
+  // contacts. Status does NOT hide anyone — a quiet person is still
+  // physically here; their row just offers no intro (see the meet
+  // card below).
+  const visiblePeople: VenuePerson[] = selectedVenue
+    ? selectedVenue.people.filter(p =>
+        personVisibleToPlayer(p, { businessContactIds, friendIds: loadFriends() })
+      )
+    : [];
   const checkedInVenue = DEMO_VENUES.find(v => v.id === checkedInVenueId) ?? null;
   // Layout changes that should repaint the map (venue card open/close,
   // check-in/out, meet open/close) — see MapAutoResize.
@@ -704,6 +719,23 @@ const RealmMapInner: React.FC = () => {
     setMeetPersonId(person.id);
     setMeetAnswerIdx(null);
   };
+
+  // Navitar icebreaker "Say hi" lands here: PresenceContext sets the
+  // handoff (and navigates to /realm when the player was elsewhere);
+  // the map opens that person's meet card, and the intro continues
+  // exactly like a tap on their Who's Here row.
+  useEffect(() => {
+    if (!meetHandoff) return;
+    const venue = DEMO_VENUES.find(v => v.id === meetHandoff.venueId);
+    const person = venue?.people.find(p => p.id === meetHandoff.personId);
+    if (venue && person) {
+      selectVenue(venue);
+      openMeet(person);
+    }
+    clearMeetHandoff();
+    // selectVenue/openMeet are stable component-local setters; the
+    // handoff object is the trigger.
+  }, [meetHandoff]);
 
   // The demo person accepts, their navitar becomes a challengeable
   // opponent, and the Battle page gets it pre-selected. The challenge is
@@ -1145,7 +1177,17 @@ const RealmMapInner: React.FC = () => {
             <Chip label={venue.kind} size="small" sx={{ ml: 1 }} />
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {venue.area} · {venue.tagline} · {venue.people.length} people here
+            {venue.area} · {venue.tagline} ·{' '}
+            {/* The count follows the same visibility rules as Who's
+            Here — an invisible person must not leak through it (live
+            nit 2026-11-13: Griffith Park read "3 people here" while
+            only 2 render, because Rosa is invisible). */}
+            {
+              venue.people.filter(p =>
+                personVisibleToPlayer(p, { businessContactIds, friendIds: loadFriends() })
+              ).length
+            }{' '}
+            people here
             {checkedInVenueId === venue.id ? ' · You are checked in here' : ''}
           </Typography>
         </Paper>
@@ -1208,10 +1250,24 @@ const RealmMapInner: React.FC = () => {
             );
           })}
 
+          {checkedInVenueId === selectedVenue.id && (
+            <>
+              <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
+                Your networking
+              </Typography>
+              <VenueNetworkingStrip />
+            </>
+          )}
+
           <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
             Who&apos;s here
           </Typography>
-          {selectedVenue.people.map(person => (
+          {visiblePeople.length === 0 && (
+            <Typography variant="body2" color="text.secondary" paragraph>
+              Nobody else is visible here right now.
+            </Typography>
+          )}
+          {visiblePeople.map(person => (
             <Paper
               key={person.id}
               sx={{
@@ -1234,6 +1290,29 @@ const RealmMapInner: React.FC = () => {
                 <Typography variant="body2" color="text.secondary">
                   {person.vibe}
                 </Typography>
+                <Box sx={{ display: 'flex', gap: 0.75, mt: 0.75, flexWrap: 'wrap' }}>
+                  <PersonStatusChip status={person.networkingStatus} />
+                  {person.visibility === 'business' && (
+                    <Chip label="Business contact" size="small" color="primary" />
+                  )}
+                  {/* Match context (Part 5): the strongest reason to
+                      talk to this person. The chip never overrides
+                      presence — a quiet person's intro stays blocked
+                      in the meet card, and dating never chips for a
+                      quiet person (getMatchReason enforces both). */}
+                  {(() => {
+                    const reason = getMatchReason(person);
+                    return reason ? (
+                      <Chip
+                        label={reason.label}
+                        size="small"
+                        color="secondary"
+                        data-testid={`match-chip-${person.id}`}
+                        data-match-kind={reason.kind}
+                      />
+                    ) : null;
+                  })()}
+                </Box>
               </Box>
             </Paper>
           ))}
@@ -1250,33 +1329,45 @@ const RealmMapInner: React.FC = () => {
                   </Typography>
                 </Box>
               </Box>
-              <Typography variant="body1" gutterBottom>
-                {meetPerson.icebreakerQuestion}
-              </Typography>
-              {meetPerson.icebreakerAnswers.map((answer, idx) => (
-                <Button
-                  key={answer.label}
-                  variant={meetAnswerIdx === idx ? 'contained' : 'outlined'}
-                  size="small"
-                  sx={{ mr: 1, mb: 1 }}
-                  disabled={meetAnswerIdx !== null}
-                  onClick={() => {
-                    setMeetAnswerIdx(idx);
-                    // Picking an answer means the player actually met
-                    // this person — that is what makes them a friend
-                    // (Profile reads this list). Only on an actual
-                    // answer pick, not on opening the card.
-                    recordMetFriend(meetPerson.id);
-                    // The icebreaker exchange becomes the thread's
-                    // first three messages (question, chosen answer,
-                    // their reply) — the Messages page reads it from
-                    // the same store. No-op when the thread exists.
-                    seedPersonThread(meetPerson, answer.label, answer.reply);
-                  }}
-                >
-                  {answer.label}
-                </Button>
-              ))}
+              {meetPerson.networkingStatus === 'quiet' ? (
+                // Quiet means no new intros: the icebreaker is not
+                // offered at all. Battles are a different flow and
+                // stay available below, exactly as for anyone else.
+                <Typography variant="body1" gutterBottom>
+                  🤫 {meetPerson.name} is keeping it quiet — no new intros right now, but thanks for
+                  stopping by.
+                </Typography>
+              ) : (
+                <>
+                  <Typography variant="body1" gutterBottom>
+                    {meetPerson.icebreakerQuestion}
+                  </Typography>
+                  {meetPerson.icebreakerAnswers.map((answer, idx) => (
+                    <Button
+                      key={answer.label}
+                      variant={meetAnswerIdx === idx ? 'contained' : 'outlined'}
+                      size="small"
+                      sx={{ mr: 1, mb: 1 }}
+                      disabled={meetAnswerIdx !== null}
+                      onClick={() => {
+                        setMeetAnswerIdx(idx);
+                        // Picking an answer means the player actually met
+                        // this person — that is what makes them a friend
+                        // (Profile reads this list). Only on an actual
+                        // answer pick, not on opening the card.
+                        recordMetFriend(meetPerson.id);
+                        // The icebreaker exchange becomes the thread's
+                        // first three messages (question, chosen answer,
+                        // their reply) — the Messages page reads it from
+                        // the same store. No-op when the thread exists.
+                        seedPersonThread(meetPerson, answer.label, answer.reply);
+                      }}
+                    >
+                      {answer.label}
+                    </Button>
+                  ))}
+                </>
+              )}
               {meetAnswerIdx === null && (
                 <Button
                   variant="outlined"

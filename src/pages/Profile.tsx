@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { useNavitar } from '../contexts/NavitarContext';
 import { useNavitarFightClub } from '../contexts/NavitarFightClub';
 import { useVenue } from '../contexts/VenueContext';
+import { usePresence } from '../contexts/PresenceContext';
 import { useUser } from '../contexts/UserContext';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../utils/supabaseClient';
@@ -50,6 +51,7 @@ import { LookPickerDialog } from '../components/LookPickerDialog';
 import AttackEditor from '../components/AttackEditor';
 import { defaultAttacksFor, isValidAttacks, type NavitarAttack } from '../utils/attacks';
 import { NavitarChat } from '../components/NavitarChat';
+import { ImHereForControls, NetworkingControls } from '../components/NetworkingStatus';
 import { isLiveAiEnabled, setLiveAiEnabled, liveAiStatus } from '../utils/liveAi';
 
 // Profile page — shows the signed-in player's profile (when a wallet is
@@ -77,6 +79,7 @@ const Profile: React.FC = () => {
     addRemoteOpponent,
   } = useNavitarFightClub();
   const { checkedInVenueId, setPendingChallenge } = useVenue();
+  const { businessContactIds, toggleBusinessContact } = usePresence();
   const { profile, isLoading } = useUser();
   // Change look for the existing navitar — the picker used to live
   // only in the create dialog, so a player who already had a navitar
@@ -548,6 +551,21 @@ const Profile: React.FC = () => {
         )}
       </Paper>
 
+      {/* Networking & visibility — the player's presence settings:
+          how open they are to meeting people, and who can see them
+          at venues. Persisted per player (PresenceContext). */}
+      <Typography variant="h5" gutterBottom>
+        Networking &amp; visibility
+      </Typography>
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <NetworkingControls />
+        <ImHereForControls />
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+          Business contacts are tagged per friend, in your Friends list below — people who keep
+          themselves visible to business contacts only will only show up for the friends you tag.
+        </Typography>
+      </Paper>
+
       <Paper sx={{ p: 3, mb: 3 }}>
         {isLoading ? (
           <Typography>Loading profile…</Typography>
@@ -894,6 +912,17 @@ const Profile: React.FC = () => {
                     <Typography variant="body2" color="text.secondary">
                       Lv. {person.navitarLevel} · {person.navitarElement}
                     </Typography>
+                    <Button
+                      size="small"
+                      variant={businessContactIds.includes(person.id) ? 'contained' : 'text'}
+                      data-testid={`business-tag-${person.id}`}
+                      onClick={() => toggleBusinessContact(person.id)}
+                      sx={{ mt: 0.5, textTransform: 'none' }}
+                    >
+                      {businessContactIds.includes(person.id)
+                        ? '★ Business contact'
+                        : 'Tag as business contact'}
+                    </Button>
                   </Box>
                   <Button
                     variant="outlined"
