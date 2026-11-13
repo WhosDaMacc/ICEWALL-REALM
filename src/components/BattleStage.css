@@ -1,0 +1,63 @@
+/* Battle stage animations — pure CSS, no new libraries.
+   The stage is the visible duel: the two navitars face each other in
+   the elemental world, and these animations are the fight feedback
+   (damage numbers, VS intro, winner glow). The lunge and flinch live
+   in the 3D scene now (ElementalWorld.tsx moves the fighter groups);
+   what stays here is the DOM layer — damage numbers, the VS intro,
+   and the winner glow on the header. */
+
+/* Damage number: pops up over the fighter that was hit, then fades. */
+@keyframes battle-damage-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.8);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-14px) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-52px) scale(1);
+  }
+}
+
+/* VS intro zoom-in. */
+@keyframes battle-vs-zoom {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* NOTE: the lunge / flinch used to live here as CSS on the art
+   wrapper (battle-anim-lunge-right / -left / -shake). The fighters
+   are in the 3D world now, so the lunge and flinch move the fighter
+   groups in the scene (ElementalWorld.tsx) instead — these classes
+   are retired, not forgotten. */
+
+.battle-anim-damage-pop {
+  animation: battle-damage-pop 0.9s ease-out forwards;
+}
+
+.battle-anim-vs {
+  animation: battle-vs-zoom 0.5s ease;
+}
+
+/* Winner's art: gold glow, raised slightly. Transition so the glow
+   fades in rather than snapping on. */
+.battle-winner {
+  filter: drop-shadow(0 0 22px rgba(255, 215, 0, 0.95));
+  transform: translateY(-8px);
+  transition:
+    filter 0.4s ease,
+    transform 0.4s ease;
+}

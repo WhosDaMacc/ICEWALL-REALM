@@ -1,14 +1,19 @@
 import React from 'react';
 import { Box, Typography, Grid, Paper, Chip } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { NavitarArtImg } from './NavitarArtImg';
 
 export interface NavitarDesignProps {
   type:
     'ice' | 'fire' | 'nature' | 'shadow' | 'light' | 'quantum' | 'electric' | 'spiritual' | 'water';
   name: string;
   level: number;
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
-  stats: {
+  // Optional: a navitar without roster data omits them, and the chip
+  // and stat bars are hidden when absent — nothing is invented. (The
+  // two bar-loop fighters, Griffin and Ashwing, carry display-default
+  // stats so their cards match the roster's — see NavitarShowcase.)
+  rarity?: 'common' | 'rare' | 'epic' | 'legendary';
+  stats?: {
     health: number;
     attack: number;
     defense: number;
@@ -18,6 +23,9 @@ export interface NavitarDesignProps {
   // type-coloured gradient as the visual (the 5 original navitars have no
   // art yet — nothing is invented for them).
   imageUrl?: string;
+  // Battles-only 3D (Eddie's standing rule, 2026-11-12): cards NEVER
+  // carry a 3D model or a 2D/3D toggle — the modeled navitars' GLBs
+  // render only on the battle stage. This component is 2D art only.
 }
 
 const NavitarCard = styled(Paper)(({ theme }) => ({
@@ -104,8 +112,8 @@ export const NavitarDesign: React.FC<NavitarDesignProps> = ({
   return (
     <NavitarCard>
       <Box sx={{ position: 'relative', mb: 2 }}>
-        {/* Navitar visual — the art image when one exists, otherwise the
-            type-coloured gradient with the pulsing glow. */}
+        {/* Navitar visual — the art image when one exists, otherwise
+            the type-coloured gradient with the pulsing glow. */}
         <Box
           sx={{
             width: '100%',
@@ -120,11 +128,11 @@ export const NavitarDesign: React.FC<NavitarDesignProps> = ({
           }}
         >
           {imageUrl ? (
-            <Box
-              component="img"
+            <NavitarArtImg
               src={imageUrl}
               alt={name}
-              sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              element={type}
+              style={{ width: '100%', height: '100%' }}
             />
           ) : (
             <Box
@@ -162,19 +170,21 @@ export const NavitarDesign: React.FC<NavitarDesignProps> = ({
           }}
         />
 
-        {/* Rarity Badge */}
-        <Chip
-          label={rarity.toUpperCase()}
-          size="small"
-          sx={{
-            position: 'absolute',
-            top: 8,
-            left: 8,
-            bgcolor: getRarityColor(rarity),
-            color: 'white',
-            fontWeight: 'bold',
-          }}
-        />
+        {/* Rarity Badge — hidden when the navitar has no rarity yet */}
+        {rarity && (
+          <Chip
+            label={rarity.toUpperCase()}
+            size="small"
+            sx={{
+              position: 'absolute',
+              top: 8,
+              left: 8,
+              bgcolor: getRarityColor(rarity),
+              color: 'white',
+              fontWeight: 'bold',
+            }}
+          />
+        )}
       </Box>
 
       <Typography variant="h6" gutterBottom>
@@ -191,44 +201,46 @@ export const NavitarDesign: React.FC<NavitarDesignProps> = ({
         }}
       />
 
-      <Grid container spacing={1}>
-        <Grid item xs={12}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="body2" sx={{ width: '60px' }}>
-              HP
-            </Typography>
-            <StatBar sx={{ flex: 1, '&::after': { width: `${(stats.health / 100) * 100}%` } }} />
-            <Typography variant="body2">{stats.health}</Typography>
-          </Box>
+      {stats && (
+        <Grid container spacing={1}>
+          <Grid item xs={12}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" sx={{ width: '60px' }}>
+                HP
+              </Typography>
+              <StatBar sx={{ flex: 1, '&::after': { width: `${(stats.health / 100) * 100}%` } }} />
+              <Typography variant="body2">{stats.health}</Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={12}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" sx={{ width: '60px' }}>
+                ATK
+              </Typography>
+              <StatBar sx={{ flex: 1, '&::after': { width: `${(stats.attack / 100) * 100}%` } }} />
+              <Typography variant="body2">{stats.attack}</Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={12}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" sx={{ width: '60px' }}>
+                DEF
+              </Typography>
+              <StatBar sx={{ flex: 1, '&::after': { width: `${(stats.defense / 100) * 100}%` } }} />
+              <Typography variant="body2">{stats.defense}</Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={12}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" sx={{ width: '60px' }}>
+                SPD
+              </Typography>
+              <StatBar sx={{ flex: 1, '&::after': { width: `${(stats.speed / 100) * 100}%` } }} />
+              <Typography variant="body2">{stats.speed}</Typography>
+            </Box>
+          </Grid>
         </Grid>
-        <Grid item xs={12}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="body2" sx={{ width: '60px' }}>
-              ATK
-            </Typography>
-            <StatBar sx={{ flex: 1, '&::after': { width: `${(stats.attack / 100) * 100}%` } }} />
-            <Typography variant="body2">{stats.attack}</Typography>
-          </Box>
-        </Grid>
-        <Grid item xs={12}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="body2" sx={{ width: '60px' }}>
-              DEF
-            </Typography>
-            <StatBar sx={{ flex: 1, '&::after': { width: `${(stats.defense / 100) * 100}%` } }} />
-            <Typography variant="body2">{stats.defense}</Typography>
-          </Box>
-        </Grid>
-        <Grid item xs={12}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="body2" sx={{ width: '60px' }}>
-              SPD
-            </Typography>
-            <StatBar sx={{ flex: 1, '&::after': { width: `${(stats.speed / 100) * 100}%` } }} />
-            <Typography variant="body2">{stats.speed}</Typography>
-          </Box>
-        </Grid>
-      </Grid>
+      )}
     </NavitarCard>
   );
 };

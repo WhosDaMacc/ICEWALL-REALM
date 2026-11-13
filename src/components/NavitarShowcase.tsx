@@ -2,7 +2,9 @@ import React from 'react';
 import { Box, Grid, Typography, Container } from '@mui/material';
 import { NavitarDesign, type NavitarDesignProps } from './NavitarDesign';
 
-const sampleNavitars: NavitarDesignProps[] = [
+// The full 9-navitar roster. The Home page's "Featured Navitars" strip shows the first three;
+// the landing funnel's pick-one chooser offers all nine.
+export const sampleNavitars: NavitarDesignProps[] = [
   {
     name: 'Frostbite',
     type: 'ice',
@@ -14,6 +16,11 @@ const sampleNavitars: NavitarDesignProps[] = [
       defense: 65,
       speed: 75,
     },
+    imageUrl: `${process.env.PUBLIC_URL}/navitars/frostbite.jpg`,
+    // Battles-only 3D (Eddie's standing rule, 2026-11-12): her ice
+    // dragon GLB renders on the battle stage only (see DEMO_OPPONENTS
+    // in NavitarFightClub) — showcase/collection cards are 2D art, so
+    // no modelUrl is carried here any more.
   },
   {
     name: 'Emberwing',
@@ -26,6 +33,10 @@ const sampleNavitars: NavitarDesignProps[] = [
       defense: 60,
       speed: 85,
     },
+    imageUrl: `${process.env.PUBLIC_URL}/navitars/emberwing.jpg`,
+    // Battles-only 3D (Eddie's standing rule, 2026-11-12): her fire
+    // dragon GLB renders on the battle stage only (see DEMO_OPPONENTS
+    // in NavitarFightClub) — no modelUrl on the card.
   },
   {
     name: 'Leafblade',
@@ -38,6 +49,7 @@ const sampleNavitars: NavitarDesignProps[] = [
       defense: 70,
       speed: 60,
     },
+    imageUrl: `${process.env.PUBLIC_URL}/navitars/leafblade.webp`,
   },
   {
     name: 'Shadowmaw',
@@ -50,6 +62,7 @@ const sampleNavitars: NavitarDesignProps[] = [
       defense: 80,
       speed: 70,
     },
+    imageUrl: `${process.env.PUBLIC_URL}/navitars/shadowmaw.jpg`,
   },
   {
     name: 'Luminara',
@@ -62,6 +75,10 @@ const sampleNavitars: NavitarDesignProps[] = [
       defense: 85,
       speed: 80,
     },
+    imageUrl: `${process.env.PUBLIC_URL}/navitars/luminara.jpg`,
+    // Battles-only 3D (Eddie's standing rule, 2026-11-12): her
+    // golden dragon GLB renders on the battle stage only (see
+    // DEMO_OPPONENTS in NavitarFightClub) — no modelUrl on the card.
   },
   {
     name: 'Quantix',
@@ -117,6 +134,9 @@ const sampleNavitars: NavitarDesignProps[] = [
   },
 ];
 
+// The Home page's "Featured Navitars" strip shows the first three.
+export const featuredNavitars: NavitarDesignProps[] = sampleNavitars.slice(0, 3);
+
 export const NavitarShowcase: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -133,6 +153,41 @@ export const NavitarShowcase: React.FC = () => {
             <NavitarDesign {...navitar} />
           </Grid>
         ))}
+        {/* Ashwing — the fire phoenix from the bar loop (Darius's navitar,
+            fire, Lv 2). Not part of the 9-navitar roster. Its card
+            carries stat bars like every other card (fix, live audit
+            2026-11-12: Ashwing's was the only card without them). The
+            numbers are display defaults in the same spirit as the
+            Griffin card below — no canonical roster stats exist for
+            Ashwing; in battle it derives from its Lv 2 venue entry,
+            on equal footing with Griffin. Battles-only 3D: its GLB
+            fights on the battle stage (venue opponents in venues.ts),
+            never on this card. */}
+        <Grid item xs={12} sm={6} md={4}>
+          <NavitarDesign
+            name="Ashwing"
+            type="fire"
+            level={2}
+            imageUrl={`${process.env.PUBLIC_URL}/navitars/ashwing.webp`}
+            stats={{ health: 80, attack: 80, defense: 65, speed: 85 }}
+          />
+        </Grid>
+        {/* Griffin — the white-blue winged lion from the bar loop (Kai's
+            navitar, ice, Lv 2). Not part of the 9-navitar roster. These
+            are DEFAULTS, not Eddie's picks: name, type, level 2 (matches
+            Ashwing so the two fight on equal footing), rarity rare,
+            stats 80/75/70/80 — all changeable on his say-so. It has no
+            2D art, so the card keeps the type-coloured gradient;
+            battles-only 3D: its GLB fights on the battle stage only. */}
+        <Grid item xs={12} sm={6} md={4}>
+          <NavitarDesign
+            name="Griffin"
+            type="ice"
+            level={2}
+            rarity="rare"
+            stats={{ health: 80, attack: 75, defense: 70, speed: 80 }}
+          />
+        </Grid>
       </Grid>
 
       <Box sx={{ mt: 4, textAlign: 'center' }}>

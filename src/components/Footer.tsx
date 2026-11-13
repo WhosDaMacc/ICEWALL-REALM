@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Typography, Link } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 
 const Footer: React.FC = () => {
   return (
@@ -39,10 +40,10 @@ const Footer: React.FC = () => {
           >
             GitHub
           </Link>
-          <Link href="#" color="inherit" underline="hover">
+          <Link component={RouterLink} to="/terms" color="inherit" underline="hover">
             Terms
           </Link>
-          <Link href="#" color="inherit" underline="hover">
+          <Link component={RouterLink} to="/privacy" color="inherit" underline="hover">
             Privacy
           </Link>
         </Box>
