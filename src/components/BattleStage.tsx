@@ -16,12 +16,13 @@
 // the damage numbers, and the VS intro overlay. The overlay is
 // pointer-events-none so the world can be dragged to look around;
 // only the VS overlay (tap to skip) takes clicks.
-import React, { useCallback, useState } from 'react';
-import { Box, Chip, LinearProgress, Paper, Typography } from '@mui/material';
+import React, { useCallback, useRef, useState } from 'react';
+import { Box, Button, Chip, LinearProgress, Paper, Typography } from '@mui/material';
 import { elementColor } from '../utils/navitarArt';
 import ElementalWorld, {
   WORLD_NAMES,
   resolveBattleWorld,
+  type CameraView,
   type FighterScreenPos,
 } from './ElementalWorld';
 import './BattleStage.css';
@@ -77,6 +78,21 @@ export interface BattleStageProps {
   // control deck under it fit one viewport — the deck never goes
   // below the fold mid-fight; the stage is what gives.
   compact?: boolean;
+  // Fill height (fix wave 3.1): in the fight-only screen the stage
+  // FLEXES to whatever vertical room the control deck leaves inside
+  // the fixed full-viewport overlay, at EVERY viewport size — the
+  // old fixed 430px desktop height plus a full-density deck
+  // overflowed a 1919×998 screen mid-duel (potions below the fold,
+  // scrolling to reach them). The Paper stretches to its flex
+  // parent and keeps only a floor (~240px; 230px on phone widths,
+  // the pinned wave-2 budget) so the fighters always have a stage.
+  // Absent (GuidedDemo, the setup preview) = exactly as before.
+  fillHeight?: boolean;
+  // Camera views (fix wave 3): when enabled, the stage carries the
+  // view switcher (Behind you / First-person / Arena) and a quick
+  // tap on the stage cycles views; the default is the third-person
+  // 'behind' view. Absent (GuidedDemo) = no switcher, Arena camera.
+  cameraViewsEnabled?: boolean;
   playerAnim: '' | 'lunge' | 'shake';
   opponentAnim: '' | 'lunge' | 'shake';
   damagePop: { key: number; value: number; target: 'player' | 'opponent' } | null;
@@ -87,10 +103,19 @@ function FighterHeader({
   fighter,
   damagePop,
   isWinner,
+  compact = false,
 }: {
   fighter: StageFighter;
   damagePop: { key: number; value: number } | null;
   isWinner: boolean;
+  // Slim power bars (fix wave 3, Eddie 2026-11-13: "Power bars need
+  // to be smaller on the screen so I can actually see my
+  // characters"). Mid-duel the header compacts hard — thinner HP
+  // and energy bars, smaller name row, tighter stack — so the
+  // fighters, not the chrome, own the stage. Every datum (name, Lv,
+  // HP numbers, element, energy) is still there; it just takes a
+  // third of the vertical room.
+  compact?: boolean;
 }) {
   const color = elementColor(fighter.element);
   return (
@@ -103,38 +128,60 @@ function FighterHeader({
         alignItems: 'center',
         textAlign: 'center',
         position: 'relative',
-        gap: 0.75,
+        gap: compact ? 0.25 : 0.75,
       }}
     >
       <Typography
-        variant="h6"
-        sx={{ color: '#fff', textShadow: '0 2px 6px rgba(0,0,0,0.8)', wordBreak: 'break-word' }}
+        variant={compact ? 'subtitle1' : 'h6'}
+        sx={{
+          color: '#fff',
+          textShadow: '0 2px 6px rgba(0,0,0,0.8)',
+          wordBreak: 'break-word',
+          lineHeight: compact ? 1.25 : undefined,
+        }}
       >
-        {fighter.name} <Chip label={`Lv. ${fighter.level}`} size="small" sx={{ ml: 0.5 }} />
+        {fighter.name}{' '}
+        <Chip
+          label={`Lv. ${fighter.level}`}
+          size="small"
+          sx={compact ? { ml: 0.5, height: 18, fontSize: '0.62rem' } : { ml: 0.5 }}
+        />
       </Typography>
-      <Box sx={{ width: '100%', maxWidth: 260 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+      <Box sx={{ width: '100%', maxWidth: compact ? 210 : 260 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: compact ? 0.25 : 0.5 }}>
           <Typography
-            variant="body2"
+            variant={compact ? 'caption' : 'body2'}
             sx={{ color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
           >
             HP {fighter.hp}/{fighter.maxHp}
           </Typography>
-          <Typography variant="body2" sx={{ color: color, fontWeight: 'bold' }}>
+          <Typography
+            variant={compact ? 'caption' : 'body2'}
+            sx={{ color: color, fontWeight: 'bold' }}
+          >
             {fighter.element}
           </Typography>
         </Box>
         <LinearProgress
           variant="determinate"
           value={(fighter.hp / Math.max(1, fighter.maxHp)) * 100}
-          sx={{ height: 12, borderRadius: 6, bgcolor: 'rgba(255,255,255,0.18)' }}
+          sx={{
+            height: compact ? 6 : 12,
+            borderRadius: 3,
+            bgcolor: 'rgba(255,255,255,0.18)',
+          }}
         />
         {fighter.energy !== undefined && (
           <LinearProgress
             variant="determinate"
             value={Math.max(0, Math.min(100, fighter.energy))}
             color="warning"
-            sx={{ height: 8, borderRadius: 4, mt: 0.75, bgcolor: 'rgba(255,255,255,0.18)' }}
+            sx={{
+              height: compact ? 4 : 8,
+              borderRadius: 2,
+              mt: compact ? 0.5 : 0.75,
+              bgcolor: 'rgba(255,255,255,0.18)',
+            }}
             aria-label={`Energy ${Math.round(fighter.energy)} of 100`}
           />
         )}
@@ -161,7 +208,7 @@ function FighterHeader({
           over an art circle. The winner's gold glow rides here too. */}
       <Box
         className={isWinner ? 'battle-winner' : ''}
-        sx={{ position: 'relative', height: 36, width: '100%' }}
+        sx={{ position: 'relative', height: compact ? 24 : 36, width: '100%' }}
       >
         {damagePop && (
           <Typography
@@ -175,7 +222,7 @@ function FighterHeader({
               textAlign: 'center',
               color: '#ff5252',
               fontWeight: 'bold',
-              fontSize: '1.9rem',
+              fontSize: compact ? '1.45rem' : '1.9rem',
               textShadow: '0 2px 6px rgba(0,0,0,0.8)',
               pointerEvents: 'none',
               zIndex: 5,
@@ -189,6 +236,13 @@ function FighterHeader({
   );
 }
 
+const CAMERA_VIEW_ORDER: CameraView[] = ['behind', 'first', 'arena'];
+const CAMERA_VIEW_LABELS: Record<CameraView, string> = {
+  behind: 'Behind you',
+  first: 'First-person',
+  arena: 'Arena',
+};
+
 const BattleStage: React.FC<BattleStageProps> = ({
   player,
   opponent,
@@ -198,11 +252,40 @@ const BattleStage: React.FC<BattleStageProps> = ({
   onVsDismiss,
   countdown = null,
   compact = false,
+  fillHeight = false,
+  cameraViewsEnabled = false,
   playerAnim,
   opponentAnim,
   damagePop,
   winner,
 }) => {
+  // Fight camera (fix wave 3): the fight screen opens in the
+  // third-person 'behind' view; the switcher (and tap-to-cycle)
+  // move between Behind you / First-person / Arena. Consumers
+  // without the switcher (GuidedDemo) stay in Arena, untouched.
+  const [cameraView, setCameraView] = useState<CameraView>(cameraViewsEnabled ? 'behind' : 'arena');
+  const cycleCameraView = useCallback(() => {
+    setCameraView(v => {
+      const i = CAMERA_VIEW_ORDER.indexOf(v);
+      return CAMERA_VIEW_ORDER[(i + 1) % CAMERA_VIEW_ORDER.length];
+    });
+  }, []);
+  // Tap-to-cycle: a quick tap (barely moved, quickly released) on
+  // the stage cycles the view; a drag must NOT — dragging is how
+  // the player looks around in every view, and it produces a long,
+  // moved press, which this distinguishes by distance + duration.
+  const tapRef = useRef<{ x: number; y: number; t: number } | null>(null);
+  const handleStagePointerDown = (e: React.PointerEvent) => {
+    tapRef.current = { x: e.clientX, y: e.clientY, t: Date.now() };
+  };
+  const handleStagePointerUp = (e: React.PointerEvent) => {
+    const start = tapRef.current;
+    tapRef.current = null;
+    if (!cameraViewsEnabled || !start || vsActive) return;
+    if ((e.target as HTMLElement).closest('[data-view-switcher]')) return;
+    const moved = Math.hypot(e.clientX - start.x, e.clientY - start.y);
+    if (moved < 8 && Date.now() - start.t < 500) cycleCameraView();
+  };
   // World selection goes through the ONE helper (resolveBattleWorld
   // in ElementalWorld): the venue's element world when NavitarBattle
   // passes a venue, the opponent's element world when it doesn't.
@@ -276,11 +359,20 @@ const BattleStage: React.FC<BattleStageProps> = ({
       data-compact={compact ? 'true' : 'false'}
       data-player-model={player?.modelUrl ?? ''}
       data-opponent-model={opponent?.modelUrl ?? ''}
+      data-camera-view={cameraViewsEnabled ? cameraView : undefined}
+      onPointerDown={handleStagePointerDown}
+      onPointerUp={handleStagePointerUp}
       sx={{
         position: 'relative',
         overflow: 'hidden',
-        p: compact ? { xs: 1.5, sm: 3 } : 3,
-        minHeight: compact ? { xs: 230, sm: 430 } : 430,
+        p: compact ? { xs: 1, sm: 3 } : 3,
+        // Fight mode (fillHeight): the min-height is only a floor —
+        // the flex parent decides the real height (see the prop),
+        // so the stage gives room to the deck at desktop sizes
+        // instead of holding a fixed 430px and pushing the deck's
+        // tail off the bottom of the screen.
+        minHeight: fillHeight ? { xs: 230, sm: 240 } : compact ? { xs: 230, sm: 430 } : 430,
+        ...(fillHeight ? { flex: '1 1 auto', minWidth: 0 } : {}),
       }}
     >
       {/* The elemental world is the stage backdrop — the duel happens
@@ -295,6 +387,7 @@ const BattleStage: React.FC<BattleStageProps> = ({
         opponentAnim={opponentAnim}
         winner={winner}
         onFighterPositions={handleFighterPositions}
+        cameraView={cameraViewsEnabled ? cameraView : undefined}
       />
       {/* HUD scrim: a soft dark gradient behind the banner + headers
           so the HUD text stays legible over bright worlds (Light,
@@ -306,7 +399,7 @@ const BattleStage: React.FC<BattleStageProps> = ({
           top: 0,
           left: 0,
           right: 0,
-          height: '46%',
+          height: compact ? '36%' : '46%',
           zIndex: 1,
           pointerEvents: 'none',
           background:
@@ -321,9 +414,10 @@ const BattleStage: React.FC<BattleStageProps> = ({
       {/* DOM layer: banner + headers + damage numbers. pointerEvents
           none so the world underneath can be dragged to look around. */}
       <Box sx={{ position: 'relative', zIndex: 2, pointerEvents: 'none' }}>
-        <Box sx={{ textAlign: 'center', mb: 2 }}>
+        <Box sx={{ textAlign: 'center', mb: compact ? 1 : 2 }}>
           <Chip
             label={venueName ? `📍 ${venueName} — ${worldName} — DEMO` : `⚔️ ${worldName}`}
+            size={compact ? 'small' : 'medium'}
             sx={{ bgcolor: 'rgba(0,0,0,0.45)', color: '#fff', fontWeight: 'bold' }}
           />
         </Box>
@@ -341,14 +435,15 @@ const BattleStage: React.FC<BattleStageProps> = ({
               fighter={player}
               damagePop={damagePop?.target === 'player' ? damagePop : null}
               isWinner={winner === 'player'}
+              compact={compact}
             />
             <Typography
-              variant="h4"
+              variant={compact ? 'h5' : 'h4'}
               sx={{
                 color: '#fff',
                 fontWeight: 'bold',
                 alignSelf: 'flex-start',
-                mt: 4,
+                mt: compact ? 1.5 : 4,
                 textShadow: '0 2px 8px rgba(0,0,0,0.7)',
               }}
             >
@@ -358,6 +453,7 @@ const BattleStage: React.FC<BattleStageProps> = ({
               fighter={opponent}
               damagePop={damagePop?.target === 'opponent' ? damagePop : null}
               isWinner={winner === 'opponent'}
+              compact={compact}
             />
           </Box>
         )}
@@ -439,6 +535,51 @@ const BattleStage: React.FC<BattleStageProps> = ({
           <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.75)', mt: 1 }}>
             Tap to skip
           </Typography>
+        </Box>
+      )}
+      {/* Camera switcher (fix wave 3): three small labelled buttons
+          in the stage's bottom-right corner. Active view is filled;
+          the others are ghosted. pointerdown is stopped so pressing
+          a button never starts a stage drag or a tap-cycle; the
+          stage's own tap handler also ignores presses that start
+          inside this box. Hidden during the VS intro (zIndex below
+          the overlay) so the face-off stays clean. */}
+      {cameraViewsEnabled && player && opponent && (
+        <Box
+          data-view-switcher="true"
+          sx={{
+            position: 'absolute',
+            right: 8,
+            bottom: 8,
+            zIndex: 3,
+            display: 'flex',
+            gap: 0.5,
+            bgcolor: 'rgba(0,0,0,0.5)',
+            borderRadius: 999,
+            p: 0.5,
+          }}
+          onPointerDown={e => e.stopPropagation()}
+        >
+          {CAMERA_VIEW_ORDER.map(v => (
+            <Button
+              key={v}
+              data-testid={`camera-view-${v}`}
+              size="small"
+              variant={cameraView === v ? 'contained' : 'text'}
+              onClick={() => setCameraView(v)}
+              sx={{
+                minWidth: 0,
+                px: 1,
+                py: 0.25,
+                fontSize: '0.68rem',
+                borderRadius: 999,
+                color: cameraView === v ? undefined : '#fff',
+                textTransform: 'none',
+              }}
+            >
+              {CAMERA_VIEW_LABELS[v]}
+            </Button>
+          ))}
         </Box>
       )}
     </Paper>

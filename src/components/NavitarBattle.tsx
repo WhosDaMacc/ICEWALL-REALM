@@ -133,6 +133,43 @@ const getTypeEffectiveness = (attackerType: string, defenderType: string): numbe
   return effectivenessChart[attackerType]?.[defenderType] || 1;
 };
 
+// POWER-LEVEL MATCHMAKING (fix wave 3, Eddie 2026-11-13: "You need
+// to match me with people of my power level so I can possibly win
+// some"). Honest labels + a fair default ONLY — no stat changes, no
+// scaling: each opponent is compared to the player's SELECTED
+// fighter by level and labelled, the picker groups fair fights
+// first, and the default selection (see the effect in the
+// component) is an even match when one exists. Joe keeps his boss
+// framing whatever the levels say.
+export type MatchTier = 'even' | 'warmup' | 'tough' | 'outclassed' | 'boss';
+export const matchTierFor = (
+  playerLevel: number,
+  opponent: { id: string; level: number }
+): MatchTier => {
+  if (opponent.id === JOE_OPPONENT_ID) return 'boss';
+  const diff = opponent.level - playerLevel;
+  if (diff > 12) return 'outclassed';
+  if (diff >= 6) return 'tough';
+  if (diff >= -5) return 'even';
+  return 'warmup';
+};
+export const MATCH_TIER_LABELS: Record<MatchTier, string> = {
+  even: 'Even match',
+  warmup: 'Warm-up',
+  tough: 'Tough fight',
+  outclassed: 'Outclasses you',
+  boss: 'Boss fight',
+};
+// Picker display order: fair fights first, the boss last (he is
+// the endgame, not the welcome mat).
+const MATCH_TIER_RANK: Record<MatchTier, number> = {
+  even: 0,
+  warmup: 1,
+  tough: 2,
+  outclassed: 3,
+  boss: 4,
+};
+
 const NavitarBattle: React.FC = () => {
   const {
     navitars,
@@ -167,6 +204,10 @@ const NavitarBattle: React.FC = () => {
   // fixed and the player taps any of the 18 arts to change it.
   const [selectedLook, setSelectedLook] = useState<string>(ALL_NAVITAR_LOOKS[0].src);
   const [showBattleAnimation, setShowBattleAnimation] = useState(false);
+  // How to Fight guide (fix wave 3): closed until the player taps
+  // the prominent toggle in the entry flow — one tap, opens in
+  // place, readable before and during setup.
+  const [howToOpen, setHowToOpen] = useState(false);
   const [currentBattleId, setCurrentBattleId] = useState<string | null>(null);
   const [battleEvent, setBattleEvent] = useState<
     'victory' | 'defeat' | 'taunt' | 'compliment' | 'critical' | 'dodge' | 'special' | null
@@ -420,6 +461,37 @@ const NavitarBattle: React.FC = () => {
       setIncomingOpponentId(pendingOpponentId);
     }
   }, [pendingOpponentId, businessNavitars, consumePendingOpponent]);
+
+  // Matchmaking default (fix wave 3): when the player's FIGHTER
+  // changes (Step 1 pick, first navitar created), pre-select a fair
+  // fight — the first Even match in roster order, else the weakest
+  // non-boss opponent. Before this, the picker opened on index 0
+  // (Quantix, Lv 22) whatever the player's level, so a fresh Lv
+  // 1–5 fighter's default fight was unwinnable. Keyed on the
+  // fighter's ID only: levelling up mid-session keeps the opponent
+  // the player chose, and an incoming-challenge handoff (pending or
+  // raised on the approval gate) always wins over the default.
+  const userFighterId = userNavitar?.id ?? null;
+  const userFighterLevel = userNavitar?.level ?? null;
+  useEffect(() => {
+    if (!userFighterId || userFighterLevel === null) return;
+    if (pendingOpponentId || incomingOpponentId) return;
+    if (businessNavitars.length === 0) return;
+    let target = businessNavitars.findIndex(n => matchTierFor(userFighterLevel, n) === 'even');
+    if (target < 0) {
+      let weakest = Infinity;
+      businessNavitars.forEach((n, i) => {
+        if (n.id === JOE_OPPONENT_ID) return;
+        if (n.level < weakest) {
+          weakest = n.level;
+          target = i;
+        }
+      });
+    }
+    if (target >= 0) selectOpponentIndex(target);
+    // (selectOpponentIndex is re-created every render; the effect
+    // is keyed on the fighter changing, not on the callback.)
+  }, [userFighterId]);
 
   // Declining an incoming challenge: drop the approval card and the
   // stored challenge venue (bookkeeping for a duel that will not
@@ -1011,6 +1083,19 @@ const NavitarBattle: React.FC = () => {
   // no hit landed.
   type PlayerAction = { kind: 'attack'; move: Move } | { kind: 'guard' } | { kind: 'focus' };
   const FOCUS_ENERGY = 30;
+  // Fight pacing (fix wave 3, Eddie 2026-11-13: "the cooldown
+  // should be less"). Every pacing constant was cut ~40% so duels
+  // feel snappier — damage, HP and the type chart are UNCHANGED:
+  //   Power Strike charge requirement: 100 -> 60 energy (it still
+  //     spends the WHOLE bar when fired — see handlePowerStrike).
+  //   Opponent (AI) turn delay: 1000ms -> 600ms (in
+  //     executePlayerAction below).
+  //   Extra-attack slot cooldown: 2000ms -> 1200ms (handleExtraAttack).
+  //   Fast-move cooldown stat: 2s -> 1.2s (battleFields in
+  //     NavitarFightClub).
+  const POWER_STRIKE_ENERGY = 60;
+  const AI_TURN_DELAY_MS = 600;
+  const EXTRA_ATTACK_COOLDOWN_MS = 1200;
 
   const executePlayerAction = (action: PlayerAction) => {
     if (!battleState || !isPlayerTurn || duelOver || vsActive || countdown !== null) return;
@@ -1092,7 +1177,10 @@ const NavitarBattle: React.FC = () => {
       if (!prev) return null;
       return {
         ...prev,
-        playerEnergy: Math.min(100, prev.playerEnergy + energyDelta),
+        // Clamped at BOTH ends: Power Strike fires at 60 energy but
+        // spends its full 100 cost (fix wave 3) — without the lower
+        // clamp the bar would sit at −40 after firing.
+        playerEnergy: Math.max(0, Math.min(100, prev.playerEnergy + energyDelta)),
         opponentNavitar: {
           ...prev.opponentNavitar,
           hp: Math.max(0, prev.opponentNavitar.hp - playerDamage),
@@ -1102,7 +1190,8 @@ const NavitarBattle: React.FC = () => {
     });
     setIsPlayerTurn(false);
 
-    // AI opponent's turn
+    // AI opponent's turn (600ms after the player's move — was
+    // 1000ms before the fix-wave-3 pacing cut).
     setTimeout(() => {
       if (!battleState) return;
       // The KO fast path above already completed the duel — the AI
@@ -1238,7 +1327,7 @@ const NavitarBattle: React.FC = () => {
             Math.max(0, battleState.playerNavitar.hp - aiDamage)
           );
       }
-    }, 1000);
+    }, AI_TURN_DELAY_MS);
   };
 
   // Attacks enter the shared executor through here — the fast move,
@@ -1268,15 +1357,16 @@ const NavitarBattle: React.FC = () => {
   // fast move. This wires the missing button through the SAME
   // handleMoveSelect path as every other player move — same turn
   // gating, effectiveness, log line, Joe calls, AI counter — with
-  // the charge economy the task specifies: it unlocks only at a full
-  // 100 energy and spends the whole bar (energyCost 100), so the
-  // state update lands the player back at 0. Damage comes from the
+  // the charge economy: it unlocks at POWER_STRIKE_ENERGY (60 since
+  // fix wave 3; it was a full 100) and spends the whole bar
+  // (energyCost 100 against a bar clamped at 0), so the state
+  // update lands the player back at 0. Damage comes from the
   // live duel snapshot's chargeMove, which handleBattle derived from
   // the (possibly Power-Draught-boosted) source navitar — the boost
   // carries, exactly as designed there.
   const handlePowerStrike = () => {
     if (!battleState || !userNavitar) return;
-    if (battleState.playerEnergy < 100) return;
+    if (battleState.playerEnergy < POWER_STRIKE_ENERGY) return;
     handleMoveSelect({
       name: battleState.playerNavitar.chargeMove.name,
       type: userNavitar.element,
@@ -1295,21 +1385,25 @@ const NavitarBattle: React.FC = () => {
   // counter. The only differences are the slot's own: its scaled
   // damage, and energyGain 0 / energyCost 0 — extra attacks generate
   // NO energy, so the charge economy is untouched (only the fast move
-  // charges Power Strike). The slot also starts its own 2s cooldown
+  // charges Power Strike). The slot also starts its own cooldown
   // before the move lands, so a fast double-click cannot fire it
-  // twice; the cooldown outlives the AI's ~1s turn, so the button
-  // stays disabled briefly into the next player turn.
+  // twice — 1.2s since fix wave 3 (was 2s); the cooldown outlives
+  // the AI's 0.6s turn, so the button stays disabled briefly into
+  // the next player turn.
   const handleExtraAttack = (slotIndex: number, name: string, damage: number) => {
     if (!userNavitar || !movesEnabled) return;
     if ((extraCooldownUntil[slotIndex] ?? 0) > Date.now()) return;
-    setExtraCooldownUntil(prev => ({ ...prev, [slotIndex]: Date.now() + 2000 }));
+    setExtraCooldownUntil(prev => ({
+      ...prev,
+      [slotIndex]: Date.now() + EXTRA_ATTACK_COOLDOWN_MS,
+    }));
     const timer = setTimeout(() => {
       setExtraCooldownUntil(prev => {
         const next = { ...prev };
         delete next[slotIndex];
         return next;
       });
-    }, 2000);
+    }, EXTRA_ATTACK_COOLDOWN_MS);
     extraCooldownTimersRef.current.push(timer);
     handleMoveSelect({
       name,
@@ -1317,7 +1411,7 @@ const NavitarBattle: React.FC = () => {
       damage,
       energyGain: 0,
       energyCost: 0,
-      cooldown: 2,
+      cooldown: 1.2,
     });
   };
 
@@ -1468,6 +1562,28 @@ const NavitarBattle: React.FC = () => {
   const previewWorldName = opponentNavitar
     ? WORLD_NAMES[resolveBattleWorld(stageVenue?.element ?? null, opponentNavitar.element)]
     : null;
+  // The Step 2 picker, grouped by matchmaking tier (fix wave 3):
+  // fair fights first, then warm-ups, tough fights, the ones that
+  // outclass the player, and the boss last — each entry keeps its
+  // TRUE index into businessNavitars, so selection, the stage
+  // preview and the duel snapshot all stay on the one index space.
+  // Without a fighter yet there are no tiers: plain roster order.
+  const pickerOpponents = businessNavitars
+    .map((n, i) => ({
+      n,
+      i,
+      tier: userNavitar ? matchTierFor(userNavitar.level, n) : null,
+    }))
+    .sort((a, b) => {
+      if (a.tier && b.tier) {
+        return MATCH_TIER_RANK[a.tier] - MATCH_TIER_RANK[b.tier] || a.n.level - b.n.level;
+      }
+      return a.i - b.i;
+    });
+  // The selected matchup's tier, for the preview line ("Your Lv 5
+  // vs Lv 15 — Tough fight").
+  const selectedTier =
+    userNavitar && opponentNavitar ? matchTierFor(userNavitar.level, opponentNavitar) : null;
   // Compact XP progress under the stage, from the navitar's stored XP.
   const xpBar = xpProgress(userNavitar?.xp ?? 0);
   // Moves are only usable during a live duel — and only once the
@@ -1478,6 +1594,25 @@ const NavitarBattle: React.FC = () => {
   const movesEnabled =
     isPlayerTurn && battleState !== null && !vsActive && countdown === null && !duelOver;
   const duelActive = battleState !== null && !duelOver;
+  // FIGHT-ONLY SCREEN (fix wave 3, Eddie 2026-11-13): while a duel
+  // is live — and through the result animation, until it settles —
+  // the battle view becomes a dedicated full-screen fight mode:
+  // stage + slim status strip + control deck, nothing else. The
+  // page title, the Step 1–3 setup panel, the XP bar and Battle
+  // Status all leave the screen, the root becomes a fixed,
+  // non-scrolling overlay, and everything fight-relevant sits on
+  // the one screen. Setup stays on the normal page; a rematch from
+  // the result starts the next duel already in fight mode, which
+  // is where the player already is.
+  // Fix wave 3.1: the fit is structural at EVERY size, not just
+  // phone widths — the overlay's column is a flex column, the
+  // stage flexes to the room the deck leaves (BattleStage
+  // fillHeight), and the deck renders at compact density at every
+  // width. Wave 3 had both gated on phone widths, so at desktop
+  // sizes the stage held a fixed 430px and the deck rendered full
+  // density: together they overflowed a 1919×998 screen and the
+  // potions fell below the fold mid-fight.
+  const fightMode = duelActive || showBattleAnimation;
   // Potions that heal/restore only work mid-duel (and not during the
   // VS intro or the countdown); the Power Draught is armed between
   // duels only.
@@ -1490,18 +1625,83 @@ const NavitarBattle: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sx={{ display: duelActive ? { xs: 'none', sm: 'block' } : 'block' }}>
-          <Typography variant="h4" align="center" gutterBottom>
-            Battle Arena
-          </Typography>
-        </Grid>
+    <Box
+      data-fight-screen={fightMode ? 'true' : undefined}
+      sx={
+        fightMode
+          ? {
+              // Fight mode: a fixed full-viewport overlay above the
+              // app chrome (Navbar/Footer render beneath it), no
+              // scrolling — the duel is the whole screen. zIndex
+              // stays below the MUI result Dialog (1300) so the
+              // victory/defeat dialog still opens over the fight.
+              position: 'fixed',
+              inset: 0,
+              zIndex: 1200,
+              bgcolor: 'background.default',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              p: { xs: 1, sm: 2 },
+            }
+          : { p: 2 }
+      }
+    >
+      <Grid
+        container
+        spacing={fightMode ? 1 : 2}
+        sx={
+          fightMode
+            ? // The fight overlay's one column: a vertical flex stack
+              // (stage / status strip / deck) filling the overlay.
+              // The stage item flexes; the strip and the deck keep
+              // their natural height (fix wave 3.1).
+              { flex: 1, minHeight: 0, flexDirection: 'column', flexWrap: 'nowrap' }
+            : undefined
+        }
+      >
+        {!fightMode && (
+          <Grid item xs={12}>
+            <Typography variant="h4" align="center" gutterBottom>
+              Battle Arena
+            </Typography>
+            <Typography variant="body1" align="center" color="text.secondary" sx={{ mb: 1 }}>
+              Pick your fighter, find a fair match, and battle! New here? Open{' '}
+              <strong>How to Fight</strong> below — it takes ten seconds.
+            </Typography>
+          </Grid>
+        )}
 
         {/* The visible battle stage: the two fighters facing each other
             in the venue's scenery. The duel logic is unchanged — this
             replaces the old side-by-side stat cards only. */}
-        <Grid item xs={12}>
+        <Grid
+          item
+          xs={12}
+          // Fight-mode flex via INLINE styles, deliberately: the
+          // grid size class sets flexGrow: 0 / flexBasis: 100% and
+          // outranks sx for exactly those longhands (measured in
+          // headless Chrome — with sx the column collapsed: the
+          // stage item shrank to its padding while the strip and
+          // deck each claimed a full container height). An inline
+          // style outranks every class, so the flex column behaves
+          // deterministically here.
+          style={
+            fightMode
+              ? // The stage takes whatever height the strip + deck
+                // leave in the fight column — never less than the
+                // stage's own floor (BattleStage fillHeight).
+                {
+                  flex: '1 1 auto',
+                  minHeight: 0,
+                  maxWidth: '100%',
+                  width: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }
+              : undefined
+          }
+        >
           {!userNavitar && (
             <Box sx={{ mt: 1, mb: 2 }}>
               <Typography variant="body2" color="text.secondary" paragraph>
@@ -1512,9 +1712,14 @@ const NavitarBattle: React.FC = () => {
               </Button>
             </Box>
           )}
-          <div ref={stageAnchorRef}>
+          <div
+            ref={stageAnchorRef}
+            style={fightMode ? { flex: 1, minHeight: 0, display: 'flex' } : undefined}
+          >
             <BattleStage
-              compact={duelActive}
+              compact={duelActive || fightMode}
+              fillHeight={fightMode}
+              cameraViewsEnabled
               player={stagePlayer}
               opponent={stageOpponent}
               venueName={stageVenue?.name ?? null}
@@ -1532,6 +1737,57 @@ const NavitarBattle: React.FC = () => {
           </div>
         </Grid>
 
+        {/* Fight-mode status strip (fix wave 3): in fight mode the
+            Battle Status card is off-screen, so the one thing the
+            player needs — what just happened — rides here instead:
+            a single slim line (latest battle-log entry, or the
+            result once decided) plus Joe's latest call on wider
+            screens. Everything else about the duel lives on the
+            stage HUD and the deck. */}
+        {fightMode && (
+          <Grid
+            item
+            xs={12}
+            // Inline styles for the same reason as the stage item:
+            // the grid size class outranks sx on flex longhands.
+            style={{ flex: '0 0 auto', maxWidth: '100%', width: '100%' }}
+          >
+            <Box
+              data-testid="fight-status-strip"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                px: 1,
+                py: 0.25,
+                minHeight: 28,
+              }}
+            >
+              <Typography variant="body2" noWrap sx={{ flex: 1, minWidth: 0 }}>
+                {battleResult
+                  ? battleResult.outcome === 'victory'
+                    ? `🏆 Victory over ${battleResult.opponentName}!`
+                    : `Defeat — ${battleResult.opponentName} takes this one.`
+                  : vsActive
+                    ? 'Get ready…'
+                    : countdown !== null
+                      ? 'Here we go…'
+                      : (battleState?.battleLog[battleState.battleLog.length - 1] ??
+                        'The duel is on!')}
+              </Typography>
+              {joeLine && (
+                <Typography
+                  variant="body2"
+                  noWrap
+                  sx={{ display: { xs: 'none', sm: 'block' }, maxWidth: '45%' }}
+                >
+                  🎙️ {joeLine}
+                </Typography>
+              )}
+            </Box>
+          </Grid>
+        )}
+
         {/* Battle entry flow (Eddie, 2026-11-12): nobody just pops up
             in a battle. Three explicit steps — 1) choose your
             navitar, 2) select an opponent (or approve/decline one
@@ -1544,16 +1800,104 @@ const NavitarBattle: React.FC = () => {
             button. Pickers lock while a duel is live — switching
             fighters mid-duel would desync the stage from the duel
             snapshot. */}
-        {!duelActive && (
+        {!duelActive && !fightMode && (
           <Grid item xs={12}>
-            <Card>
-              <CardContent>
+            <Card sx={{ borderRadius: 4 }}>
+              <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
+                {/* HOW TO FIGHT (fix wave 3, Eddie 2026-11-13: "some
+                  instructions on how to fight before you start a
+                  fight — a section that tells you how to fight").
+                  Discoverable in ONE tap: the big friendly button
+                  toggles the guide open right here, above Step 1,
+                  readable before and during setup. Short plain
+                  lines, no jargon; every claim matches the duel
+                  code (damage labels are effectiveness-adjusted,
+                  Power Strike unlocks at 60 energy, Guard halves
+                  the next hit, Focus is +30, potions never use the
+                  turn, XP banks on the fighter that fought, Forfeit
+                  is a free loss). */}
+                <Box sx={{ mb: 2.5 }}>
+                  <Button
+                    variant="contained"
+                    color="info"
+                    fullWidth
+                    data-testid="how-to-fight-toggle"
+                    aria-expanded={howToOpen}
+                    onClick={() => setHowToOpen(o => !o)}
+                    sx={{ py: 1.25, fontWeight: 'bold', borderRadius: 3, fontSize: '1rem' }}
+                  >
+                    ❓ How to Fight {howToOpen ? '▴' : '▾'}
+                  </Button>
+                  {howToOpen && (
+                    <Paper
+                      data-testid="how-to-fight"
+                      variant="outlined"
+                      sx={{ p: 2, mt: 1.5, borderRadius: 3 }}
+                    >
+                      <Typography variant="subtitle1" gutterBottom>
+                        How to Fight — the quick version
+                      </Typography>
+                      <Box
+                        component="ul"
+                        sx={{ m: 0, pl: 2.5, '& li': { mb: 0.75 }, '& li:last-child': { mb: 0 } }}
+                      >
+                        <li>
+                          <Typography variant="body2">
+                            🎯 <strong>Pick a move each turn.</strong> Tap a move card — your
+                            navitar strikes, then your opponent answers.
+                          </Typography>
+                        </li>
+                        <li>
+                          <Typography variant="body2">
+                            🔢 <strong>The damage on each button is the real number.</strong> It
+                            already includes type matchups — ×2 when you&apos;re super effective,
+                            ×0.5 when they resist you.
+                          </Typography>
+                        </li>
+                        <li>
+                          <Typography variant="body2">
+                            ⚡ <strong>Energy builds as you fight.</strong> When it reaches 60,{' '}
+                            <strong>Power Strike</strong> is ready — it spends your energy on one
+                            big hit.
+                          </Typography>
+                        </li>
+                        <li>
+                          <Typography variant="body2">
+                            🛡️ <strong>Guard</strong> halves the next hit against you.
+                          </Typography>
+                        </li>
+                        <li>
+                          <Typography variant="body2">
+                            🎯 <strong>Focus</strong> restores +30 energy instead of attacking.
+                          </Typography>
+                        </li>
+                        <li>
+                          <Typography variant="body2">
+                            🧪 <strong>Potions are free</strong> and don&apos;t use your turn — heal
+                            up whenever you like.
+                          </Typography>
+                        </li>
+                        <li>
+                          <Typography variant="body2">
+                            🏆 <strong>Winning earns points and XP</strong> for the navitar that
+                            fought.
+                          </Typography>
+                        </li>
+                        <li>
+                          <Typography variant="body2">
+                            🏳️ <strong>Forfeit</strong> ends the duel as a loss — and costs nothing.
+                          </Typography>
+                        </li>
+                      </Box>
+                    </Paper>
+                  )}
+                </Box>
                 {/* STEP 1 — choose your navitar. The active navitar is
                   the fighter; it comes pre-selected and tapping
                   another card is the explicit choice (it switches the
                   active navitar, like Profile does). */}
                 <Typography variant="h6" gutterBottom>
-                  Step 1 · Choose your Navitar
+                  Step 1 · Your fighter
                 </Typography>
                 {userNavitar ? (
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
@@ -1581,7 +1925,7 @@ const NavitarBattle: React.FC = () => {
 
                 {/* STEP 2 — select or approve the opponent. */}
                 <Typography variant="h6" gutterBottom>
-                  Step 2 · Choose your Opponent
+                  Step 2 · Pick your opponent
                 </Typography>
                 {/* Incoming challenge: a handoff from a venue meet, a
                   friend, or the wilds lands HERE — pre-selected in
@@ -1621,19 +1965,26 @@ const NavitarBattle: React.FC = () => {
                     </Button>
                   </Paper>
                 )}
+                {userNavitar && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    Every opponent is labelled against your fighter&apos;s level — an{' '}
+                    <strong>Even match</strong> is a fair fight you can win. New here? Start there.
+                  </Typography>
+                )}
                 {businessNavitars.length > 1 && (
                   <Box
                     sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center', mb: 2 }}
                   >
-                    {businessNavitars.map((n, i) => (
+                    {pickerOpponents.map(({ n, i, tier }) => (
                       <Button
                         key={n.id}
                         size="small"
                         variant={i === opponentIndex ? 'contained' : 'outlined'}
                         disabled={duelActive}
                         onClick={() => selectOpponentIndex(i)}
+                        data-match-tier={tier ?? undefined}
                       >
-                        {n.name} (Lv. {n.level})
+                        {n.name} (Lv. {n.level}){tier ? ` · ${MATCH_TIER_LABELS[tier]}` : ''}
                       </Button>
                     ))}
                   </Box>
@@ -1650,14 +2001,18 @@ const NavitarBattle: React.FC = () => {
                     {opponentNavitar.skills.length > 0
                       ? ` · skills: ${opponentNavitar.skills.join(', ')}`
                       : ''}
-                    ) — 🌍 {previewWorldName}
+                    )
+                    {selectedTier
+                      ? ` — Your Lv ${userNavitar.level} vs Lv ${opponentNavitar.level} — ${MATCH_TIER_LABELS[selectedTier]}`
+                      : ''}{' '}
+                    — 🌍 {previewWorldName}
                     {stageVenue ? ` at ${stageVenue.name}` : ''}
                   </Typography>
                 )}
 
                 {/* STEP 3 — the one clear start button. */}
                 <Typography variant="h6" gutterBottom>
-                  Step 3 · Start the Battle
+                  Step 3 · Ready? Start the battle
                 </Typography>
                 <Button
                   variant="contained"
@@ -1752,8 +2107,19 @@ const NavitarBattle: React.FC = () => {
             the fold. All deck buttons carry a 48px minimum height,
             and the sections' heights are content-fixed (labels and
             cooldowns swap text in place), so the deck does not jump
-            around mid-fight. */}
-        <Grid item xs={12}>
+            around mid-fight. Fix wave 3.1: in fight mode the deck
+            sits at the bottom of the overlay's flex column and
+            renders at compact density at EVERY width (descriptions
+            and captions collapse, sections tighten) while the stage
+            flexes above it — at desktop sizes the full-density deck
+            had pushed the potions off the bottom of the screen. */}
+        <Grid
+          item
+          xs={12}
+          // Inline styles for the same reason as the stage item:
+          // the grid size class outranks sx on flex longhands.
+          style={fightMode ? { flex: '0 0 auto', maxWidth: '100%', width: '100%' } : undefined}
+        >
           {/* A styled Box, deliberately NOT a Card/Paper: the smoke
               harnesses locate the fast-move card as the .MuiPaper-root
               carrying its name + damage, and a Paper wrapper here
@@ -1764,13 +2130,13 @@ const NavitarBattle: React.FC = () => {
               bgcolor: 'background.paper',
               border: '1px solid',
               borderColor: 'divider',
-              borderRadius: 2,
+              borderRadius: 3,
               boxShadow: 3,
               pb: 1,
             }}
           >
             <BattleMoves
-              compact={duelActive}
+              compact={fightMode}
               moves={playerMoves}
               onMoveSelect={move =>
                 handleMoveSelect({
@@ -1793,11 +2159,14 @@ const NavitarBattle: React.FC = () => {
                         : userNavitar.fastMove.damage * 2,
                       type: userNavitar.element,
                       effectiveness: playerEffectiveness,
+                      energyCost: POWER_STRIKE_ENERGY,
                     }
                   : null
               }
               onPowerStrike={handlePowerStrike}
-              powerStrikeReady={movesEnabled && (battleState?.playerEnergy ?? 0) >= 100}
+              powerStrikeReady={
+                movesEnabled && (battleState?.playerEnergy ?? 0) >= POWER_STRIKE_ENERGY
+              }
             />
 
             {/* Slots 2–5 — the custom attacks beyond the fast move. One button
@@ -1859,7 +2228,7 @@ const NavitarBattle: React.FC = () => {
                             <Box
                               component="span"
                               sx={{ display: { xs: 'none', sm: 'inline' } }}
-                            >{` · 2s`}</Box>
+                            >{` · 1.2s`}</Box>
                             {playerEffectiveness !== 1 ? ` (×${playerEffectiveness})` : ''}
                           </>
                         )}
@@ -1870,7 +2239,12 @@ const NavitarBattle: React.FC = () => {
                 <Typography
                   variant="caption"
                   color="text.secondary"
-                  sx={{ mt: 0.5, display: { xs: 'none', sm: 'block' } }}
+                  sx={{
+                    mt: 0.5,
+                    // Collapsed in fight mode at every width (the
+                    // compact deck density, fix wave 3.1).
+                    display: fightMode ? 'none' : { xs: 'none', sm: 'block' },
+                  }}
                 >
                   Extra attacks generate no energy — only the fast move charges Power Strike.
                 </Typography>
@@ -1888,7 +2262,12 @@ const NavitarBattle: React.FC = () => {
             (and Focus is disabled at a full energy bar, where it
             would do nothing). */}
             {userNavitar && (
-              <Box sx={{ px: { xs: 1.5, sm: 2 }, pb: { xs: 1.25, sm: 2 } }}>
+              <Box
+                sx={{
+                  px: { xs: 1.5, sm: 2 },
+                  pb: fightMode ? 1.25 : { xs: 1.25, sm: 2 },
+                }}
+              >
                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
                   <Typography variant="subtitle2">Tactics:</Typography>
                   <Button
@@ -1968,7 +2347,10 @@ const NavitarBattle: React.FC = () => {
                 <Typography
                   variant="caption"
                   color="text.secondary"
-                  sx={{ mt: 0.5, display: { xs: 'none', sm: 'block' } }}
+                  sx={{
+                    mt: 0.5,
+                    display: fightMode ? 'none' : { xs: 'none', sm: 'block' },
+                  }}
                 >
                   Guard and Focus use your turn — your opponent moves after them. Forfeit ends the
                   duel as a loss and costs nothing.
@@ -1983,7 +2365,12 @@ const NavitarBattle: React.FC = () => {
                 the player's turn; Power Draught is armed between
                 duels and boosts the next duel only. Counts are live
                 (re-read after every use). */}
-            <Box sx={{ px: { xs: 1.5, sm: 2 }, pb: { xs: 1.25, sm: 2 } }}>
+            <Box
+              sx={{
+                px: { xs: 1.5, sm: 2 },
+                pb: fightMode ? 1.25 : { xs: 1.25, sm: 2 },
+              }}
+            >
               <Box
                 sx={{
                   display: 'flex',
@@ -2018,7 +2405,7 @@ const NavitarBattle: React.FC = () => {
                   <Typography
                     variant="caption"
                     color="text.secondary"
-                    sx={{ display: { xs: 'none', sm: 'block' } }}
+                    sx={{ display: fightMode ? 'none' : { xs: 'none', sm: 'block' } }}
                   >
                     {POTIONS.health.blurb}
                   </Typography>
@@ -2046,7 +2433,7 @@ const NavitarBattle: React.FC = () => {
                   <Typography
                     variant="caption"
                     color="text.secondary"
-                    sx={{ display: { xs: 'none', sm: 'block' } }}
+                    sx={{ display: fightMode ? 'none' : { xs: 'none', sm: 'block' } }}
                   >
                     {POTIONS.recharge.blurb}
                   </Typography>
@@ -2074,7 +2461,7 @@ const NavitarBattle: React.FC = () => {
                   <Typography
                     variant="caption"
                     color="text.secondary"
-                    sx={{ display: { xs: 'none', sm: 'block' } }}
+                    sx={{ display: fightMode ? 'none' : { xs: 'none', sm: 'block' } }}
                   >
                     {POTIONS.power.blurb}
                   </Typography>
@@ -2090,8 +2477,10 @@ const NavitarBattle: React.FC = () => {
         </Grid>
 
         {/* XP progress — the level the stage already shows, plus how far
-            into it the navitar is. Moves when a win or training banks XP. */}
-        {userNavitar && (
+            into it the navitar is. Moves when a win or training banks XP.
+            Hidden in fight mode (fix wave 3): the fight screen is
+            stage + strip + deck only. */}
+        {userNavitar && !fightMode && (
           <Grid item xs={12}>
             <Box sx={{ maxWidth: 480, mx: 'auto' }}>
               <Typography variant="body2" align="center" color="text.secondary">
@@ -2112,8 +2501,11 @@ const NavitarBattle: React.FC = () => {
             (the old bare "taunt" word told the player nothing), and the
             decided result persists here until a new duel starts or the
             player dismisses it. The result carries the final score in
-            text, because the HP bars are healed to full on duel end. */}
-        <Grid item xs={12}>
+            text, because the HP bars are healed to full on duel end.
+            Display-none in fight mode (fix wave 3): its one essential
+            line rides the fight status strip instead, and the card
+            returns with the result dialog when the duel settles. */}
+        <Grid item xs={12} sx={{ display: fightMode ? 'none' : 'block' }}>
           <Card>
             <CardContent>
               <Typography variant="h6" align="center">

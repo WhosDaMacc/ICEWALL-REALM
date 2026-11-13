@@ -27,22 +27,29 @@ interface BattleMovesProps {
   isPlayerTurn: boolean;
   // Power Strike — the duel's charge move (2× fast-move damage in the
   // duel state). Rendered as its own card under the fast move; ready
-  // only at a full 100 energy, and firing it spends the 100. Its
-  // damage label is effectiveness-adjusted like every other move.
+  // once energy reaches `energyCost` (60 since fix wave 3 — the
+  // charge requirement was cut ~40% from 100), and firing it spends
+  // the whole bar. Its damage label is effectiveness-adjusted like
+  // every other move.
   powerStrike?: {
     name: string;
     damage: number;
     type: Move['type'];
     effectiveness?: number;
+    energyCost?: number;
   } | null;
   onPowerStrike?: () => void;
   powerStrikeReady?: boolean;
   // Compact duel mode (fighting ergonomics, 2026-11-12): while a
-  // duel is live, phone widths squeeze this panel — tighter cards,
-  // no heading — so the stage + the whole control deck fit one
-  // viewport without scrolling (verified at 390×844 in the browser
-  // parity suite; the pre-compact deck measured 991px tall there and
-  // pushed Guard/Focus/Forfeit and the potions below the fold).
+  // duel is live this panel squeezes — tighter cards, no heading, no
+  // move descriptions — so the stage + the whole control deck fit
+  // one viewport without scrolling (verified at 390×844 in the
+  // browser parity suite; the pre-compact deck measured 991px tall
+  // there and pushed Guard/Focus/Forfeit and the potions below the
+  // fold). Fix wave 3.1: the squeeze applies at EVERY width, not
+  // just phone widths — keyed to the fight-only screen being
+  // active, because at desktop sizes the full-density deck plus a
+  // fixed-height stage overflowed even a 1919×998 viewport.
   compact?: boolean;
 }
 
@@ -65,11 +72,12 @@ const MoveCard = styled(Paper, {
   [theme.breakpoints.down('sm')]: {
     padding: theme.spacing(1.5),
     marginBottom: theme.spacing(1.5),
-    // Mid-duel the deck compresses further: slimmer cards, half the
-    // gap — the moves stay full-width and tappable, they just stop
-    // spending vertical space the fight doesn't need.
-    ...(compact ? { padding: theme.spacing(1), marginBottom: theme.spacing(1) } : {}),
   },
+  // Mid-duel (compact) the deck compresses further — at EVERY width
+  // (fix wave 3.1): slimmer cards, half the gap. The moves stay
+  // full-width and tappable; they just stop spending vertical space
+  // the fight doesn't need.
+  ...(compact ? { padding: theme.spacing(1), marginBottom: theme.spacing(1) } : {}),
 }));
 
 // The honest damage number for a move card: base damage adjusted by
@@ -122,19 +130,19 @@ export const BattleMoves: React.FC<BattleMovesProps> = ({
 }) => {
   const energy = Math.max(0, Math.min(100, Math.round(currentEnergy)));
   return (
-    <Box sx={{ p: compact ? { xs: 1.25, sm: 2 } : 2 }}>
+    <Box sx={{ p: compact ? 1.25 : 2 }}>
       <Typography
         variant="h6"
         gutterBottom
         color="white"
-        sx={compact ? { display: { xs: 'none', sm: 'block' } } : undefined}
+        sx={compact ? { display: 'none' } : undefined}
       >
-        Available Moves
+        Your move
       </Typography>
       {/* Energy meter — the charge economy made visible. Fast moves
           grant energy (see "Gain:" on the move card), a Recharge
           potion adds 50, and Power Strike below spends a full bar. */}
-      <Box sx={{ mb: compact ? { xs: 1, sm: 2 } : 2 }} aria-label={`Energy ${energy} of 100`}>
+      <Box sx={{ mb: compact ? 1 : 2 }} aria-label={`Energy ${energy} of 100`}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
           <Typography variant="body2" color="white">
             ⚡ Energy
@@ -147,7 +155,11 @@ export const BattleMoves: React.FC<BattleMovesProps> = ({
           variant="determinate"
           value={energy}
           color="warning"
-          sx={{ height: 10, borderRadius: 5, bgcolor: 'rgba(255,255,255,0.15)' }}
+          sx={{
+            height: compact ? 6 : 10,
+            borderRadius: 5,
+            bgcolor: 'rgba(255,255,255,0.15)',
+          }}
         />
       </Box>
       {moves.map((move, index) => (
@@ -166,7 +178,7 @@ export const BattleMoves: React.FC<BattleMovesProps> = ({
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              mb: compact ? { xs: 0.5, sm: 1 } : 1,
+              mb: compact ? 0.5 : 1,
             }}
           >
             <Typography variant="subtitle1" sx={{ color: getTypeColor(move.type) }}>
@@ -179,7 +191,7 @@ export const BattleMoves: React.FC<BattleMovesProps> = ({
           <Typography
             variant="body2"
             color="text.secondary"
-            sx={{ mb: 1, display: { xs: 'none', sm: 'block' } }}
+            sx={{ mb: 1, display: compact ? 'none' : { xs: 'none', sm: 'block' } }}
           >
             {move.description}
           </Typography>
@@ -214,22 +226,22 @@ export const BattleMoves: React.FC<BattleMovesProps> = ({
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              mb: compact ? { xs: 0.5, sm: 1 } : 1,
+              mb: compact ? 0.5 : 1,
             }}
           >
             <Typography variant="subtitle1" sx={{ color: '#FFC107' }}>
               💥 {powerStrike.name}
             </Typography>
-            <Typography variant="body2">Energy: 100</Typography>
+            <Typography variant="body2">Energy: {powerStrike.energyCost ?? 100}</Typography>
           </Box>
           <Typography
             variant="body2"
             color="text.secondary"
-            sx={{ mb: 1, display: { xs: 'none', sm: 'block' } }}
+            sx={{ mb: 1, display: compact ? 'none' : { xs: 'none', sm: 'block' } }}
           >
             {powerStrikeReady
               ? 'Fully charged — unleash it!'
-              : `Charge to 100 energy to unleash it (now ${energy}/100).`}
+              : `Charge to ${powerStrike.energyCost ?? 100} energy to unleash it (now ${energy}/100).`}
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="body2">

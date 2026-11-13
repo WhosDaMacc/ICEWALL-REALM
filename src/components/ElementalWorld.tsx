@@ -141,8 +141,22 @@ export interface FighterScreenPos {
   y: number;
 }
 
+// Fight camera views (fix wave 3, Eddie 2026-11-13: Pokémon
+// Go-style presentation). 'behind' is the third-person default for
+// the fight screen — camera behind the player's fighter, looking
+// across at the opponent, so the player's fighter is large in the
+// lower foreground BY DESIGN (that asymmetry is the style, not the
+// old framing bug). 'first' sits at the player fighter's head.
+// 'arena' is the classic front view the wave-2 parity fix proved
+// symmetric — parity is judged there.
+export type CameraView = 'behind' | 'first' | 'arena';
+
 export interface ElementalWorldProps {
   world: ElementalWorldId;
+  // The active fight camera view; the render loop reads it live
+  // (via liveRef) so switching never rebuilds the scene. Absent =
+  // 'arena' (GuidedDemo and any other consumer keep the front view).
+  cameraView?: CameraView;
   // The venue's element: the arena's rim lighting. Ignored by the
   // elemental worlds (they have their own lighting).
   accentElement?: string | null;
@@ -678,6 +692,7 @@ const ElementalWorld: React.FC<ElementalWorldProps> = ({
   opponentAnim,
   winner,
   onFighterPositions,
+  cameraView,
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const [canRender3d] = useState(() => webglAvailable());
@@ -685,8 +700,8 @@ const ElementalWorld: React.FC<ElementalWorldProps> = ({
   // The render loop reads the live duel state from this ref (same
   // callbacksRef pattern as ModelCanvas): props changing must move
   // the fighters without rebuilding the scene.
-  const liveRef = useRef({ playerAnim, opponentAnim, winner });
-  liveRef.current = { playerAnim, opponentAnim, winner };
+  const liveRef = useRef({ playerAnim, opponentAnim, winner, cameraView });
+  liveRef.current = { playerAnim, opponentAnim, winner, cameraView };
   // Same pattern for the label-position callback: the loop always
   // calls the latest prop without the scene effect re-running.
   const posCbRef = useRef(onFighterPositions);
@@ -2081,6 +2096,10 @@ const ElementalWorld: React.FC<ElementalWorldProps> = ({
     // Scratch vector + throttle state for the label projection.
     const projVec = new THREE.Vector3();
     const projTop = new THREE.Vector3();
+    // Scratch vectors for the per-view camera math (fix wave 3).
+    const camAnchor = new THREE.Vector3();
+    const camOffset = new THREE.Vector3();
+    const camUp = new THREE.Vector3(0, 1, 0);
     let lastReport: Record<'player' | 'opponent', FighterScreenPos | null> | null = null;
     let lastTick = performance.now();
     const tick = () => {
@@ -2131,17 +2150,51 @@ const ElementalWorld: React.FC<ElementalWorldProps> = ({
         winnerRing.visible = false;
       }
 
-      // The camera SWAYS around the front instead of revolving: a
-      // full orbit periodically swings behind/side-on, where the two
-      // fighters line up in projection and read as one cluster in the
-      // centre of the ring (live check 2026-11-12). A slow ±0.15 rad
-      // sway around the FRONT base keeps the classic fighting-game
-      // framing — player left, opponent right, equidistant — while
-      // the world still feels alive. Dragging moves the base angle
-      // freely; the sway rides on top.
-      const angle = orbit + Math.sin(t * 0.1) * 0.15;
-      camera.position.set(Math.sin(angle) * 7.6, 3.0, Math.cos(angle) * 7.6);
-      camera.lookAt(0, 1.0, 0);
+      // ---------- Camera views (fix wave 3, Eddie 2026-11-13) ----
+      // ARENA (the wave-2 framing, unchanged): the camera SWAYS
+      // around the front instead of revolving — a full orbit
+      // periodically swings behind/side-on, where the two fighters
+      // line up in projection and read as one cluster in the centre
+      // of the ring (live check 2026-11-12). A slow ±0.15 rad sway
+      // around the FRONT base keeps both fighters equidistant —
+      // parity is judged in THIS view.
+      // BEHIND (the fight screen's default): Pokémon Go-style
+      // third-person — the camera sits behind the player's fighter,
+      // looking across the arena at the opponent, so the player's
+      // fighter is large in the lower foreground ON PURPOSE (the
+      // style Eddie asked for, not the old framing bug: in Arena
+      // the same two fighters still measure equal).
+      // FIRST: the camera sits at the player fighter's head and the
+      // player rig hides, so the opponent fills the view.
+      // Dragging looks around in every view: in Arena it orbits the
+      // ring freely; in Behind/First it yaws the view (clamped, so
+      // a drag can never swing round behind the opponent).
+      const view = live.cameraView ?? 'arena';
+      const sway = Math.sin(t * 0.1) * 0.15;
+      if (mount && mount.dataset.cameraView !== view) mount.dataset.cameraView = view;
+      for (const rig of rigs) {
+        const hidden = view === 'first' && rig.side === 'player';
+        rig.group.visible = !hidden;
+        rig.shadow.visible = !hidden;
+      }
+      if (view === 'behind') {
+        camAnchor.set(OPPONENT_X, 1.05, 0);
+        const yaw = THREE.MathUtils.clamp(orbit, -0.7, 0.7) + sway * 0.35;
+        camOffset.set(-8.6, 1.75, 2.9).applyAxisAngle(camUp, yaw);
+        camera.position.copy(camAnchor).add(camOffset);
+        camera.lookAt(camAnchor);
+      } else if (view === 'first') {
+        const yaw = THREE.MathUtils.clamp(orbit, -1.1, 1.1) + sway * 0.35;
+        camera.position.set(PLAYER_X, 1.55, 0);
+        // Look across at the opponent (the +x direction), yawed by
+        // the drag; a slight downward tilt keeps the opponent's
+        // whole body and its floor lane in frame.
+        camera.lookAt(PLAYER_X + Math.cos(yaw), 1.46, -Math.sin(yaw));
+      } else {
+        const angle = orbit + sway;
+        camera.position.set(Math.sin(angle) * 7.6, 3.0, Math.cos(angle) * 7.6);
+        camera.lookAt(0, 1.0, 0);
+      }
       camera.updateMatrixWorld();
 
       // Project each fighter's BASE point for BattleStage's DOM
@@ -2160,6 +2213,10 @@ const ElementalWorld: React.FC<ElementalWorldProps> = ({
           opponent: null,
         };
         for (const rig of rigs) {
+          // First-person: the player fighter is the camera — it has
+          // no floor label (its projected point would sit on the
+          // lens and jitter). The opponent's label still tracks.
+          if (view === 'first' && rig.side === 'player') continue;
           projVec.set(rig.group.position.x, 0.1, rig.group.position.z);
           projVec.project(camera);
           if (projVec.z < 1) {

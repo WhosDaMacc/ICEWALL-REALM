@@ -336,7 +336,10 @@ const battleFields = (
       name: moveName,
       damage: moveDamage ?? 8 + Math.floor(level * 1.5),
       energyGain: 10,
-      cooldown: 2,
+      // Cooldown 2s -> 1.2s (fix wave 3, Eddie 2026-11-13: "the
+      // cooldown should be less" — every fight-pacing constant cut
+      // ~40%; see NavitarBattle for the AI-turn and slot cooldowns).
+      cooldown: 1.2,
     },
   };
 };
@@ -525,6 +528,29 @@ const DEMO_OPPONENTS: Navitar[] = [
     element: 'quantum',
     ...battleFields(30, 10, 'Verdict Slam'),
   },
+  {
+    // Leafpup — the arena's sparring partner (fix wave 3, Eddie
+    // 2026-11-13: "match me with people of my power level so I can
+    // possibly win some"). Every other demo opponent is Lv 15–30,
+    // so a fresh Lv 1–5 fighter had NO even match in the Step 2
+    // picker. Leafpup is a low-level nature navitar in this list's
+    // style (name/art follow the wild-navitar convention in
+    // src/data/wild.ts: a new name on existing art — leafblade.webp —
+    // and skills from the existing nature move pool). Stamina 4
+    // gives 70 HP by the usual formula. The matchmaking labels in
+    // NavitarBattle steer new fighters here by default.
+    id: 'demo-leafpup',
+    name: 'Leafpup',
+    imageUrl: NAVITAR_ART.leafblade,
+    owner: 'demo-arena',
+    type: 'business',
+    level: 4,
+    xp: 0,
+    stats: { strength: 45, defense: 50, speed: 55, stamina: 4 },
+    skills: ['Vine Whip', 'Leaf Shield'],
+    element: 'nature',
+    ...battleFields(4, 4),
+  },
 ];
 
 // Joe's demo-opponent id — the Battle page's CHALLENGE JOE button and
@@ -572,7 +598,7 @@ const migrateNavitar = (value: unknown): Navitar | null => {
         name: attacks[0].name,
         damage: attackPowerAtLevel(attacks[0].power, full.level),
         energyGain: 10,
-        cooldown: 2,
+        cooldown: 1.2,
       },
     };
   }
